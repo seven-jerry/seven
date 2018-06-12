@@ -1,0 +1,207 @@
+ <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<sizing>
+    <avaliableSizes id="avaliableSizes">
+        <sizeCatalog id="default">
+            <baseClass id="iPadLandscape" width="1000" height ="768" description="iPadLandscape"/>
+            <sizeClass id="iPadPortrait" width="768" height ="1000" description="iPadPortrait"/>
+            <sizeClass id="desktop" width="1300" height="1000" description="Desktop"/>
+        </sizeCatalog>
+    </avaliableSizes>
+    <variables>
+        <variable id="halfWidth">
+            <sizeClass id="iPadPortrait"  value="384"/>
+            <sizeClass id="iPadLandscape" value="500"/>
+            <sizeClass id="desktop"       value="650"/>
+        </variable>
+        <variable id="fullWidth">
+            <sizeClass id="iPadPortrait"  value="768"/>
+            <sizeClass id="iPadLandscape" value="1000"/>
+            <sizeClass id="desktop"       value="1300"/>
+        </variable>
+        <variable id="quarterWidth">
+            <sizeClass id="iPadPortrait"  value="192"/>
+            <sizeClass id="iPadLandscape" value="250"/>
+            <sizeClass id="desktop"       value="325"/>
+        </variable>
+        <variable id="threeQuarterWidth">
+            <sizeClass id="iPadPortrait"  value="576"/>
+            <sizeClass id="iPadLandscape" value="750"/>
+            <sizeClass id="desktop"       value="975"/>
+        </variable>
+        <variable id="overlay.blocklist.width">
+            <sizeClass id="iPadPortrait"  value="434"/>
+            <sizeClass id="iPadLandscape" value="480"/>
+            <sizeClass id="desktop"       value="640"/>
+        </variable>
+    </variables>
+    <sizes>
+        <!-- main structure !-->
+        <size id="navbar">
+            <sizeClass id="iPadPortrait"  x="0" y="0" width="var:fullWidth" height="60"/>
+            <sizeClass id="iPadLandscape" x="0" y="0" width="var:fullWidth" height="60"/>
+            <sizeClass id="desktop"       x="0" y="0" width="var:fullWidth" height="40"/>
+        </size>
+        <size id="mainContent">
+            <sizeClass id="iPadPortrait"  x="0" y="60" width="var:fullWidth" height="800"/>
+            <sizeClass id="iPadLandscape" x="0" y="60" width="var:fullWidth" height="568"/>
+            <sizeClass id="desktop"       x="0" y="40" width="var:fullWidth" height="860"/>
+        </size>
+        <size id="workingArea">
+            <sizeClass id="iPadPortrait"  x="0" y="860" width="var:fullWidth" height="140"/>
+            <sizeClass id="iPadLandscape" x="0" y="628" width="var:fullWidth" height="140"/>
+            <sizeClass id="desktop"       x="0" y="900" width="var:fullWidth" height="100"/>
+        </size>
+        <!-- main content !-->
+        <size id="mainContent.inner">
+            <sizeClass id="iPadPortrait"  x="0" y="0" width="var:fullWidth" height="800"/>
+            <sizeClass id="iPadLandscape" x="0" y="0" width="var:fullWidth" height="568"/>
+            <sizeClass id="desktop"       x="0" y="0" width="var:fullWidth" height="860"/>
+        </size>
+        <!-- history content !-->
+        <size id="historyElement">
+            <sizeClass id="iPadPortrait"  x="10" y="10" width="748" height="90"/>
+            <sizeClass id="iPadLandscape" x="20" y="20" width="960" height="70"/>
+            <sizeClass id="desktop"       x="20" y="20" width="1260" height="40"/>
+        </size>
+        <!-- blocklist container !-->
+        <size id="blockListContainer">
+            <sizeClass id="iPadPortrait"  x="10" y="10" width="748" height="200"/>
+            <sizeClass id="iPadLandscape" x="20" y="20" width="960" height="200"/>
+            <sizeClass id="desktop"       x="20" y="20" width="1260" height="130"/>
+        </size>
+         <size id="blockListContainer.min">
+            <sizeClass id="iPadPortrait"  x="0" y="30" width="0" height="100"/>
+            <sizeClass id="iPadLandscape" x="0" y="30" width="0" height="100"/>
+            <sizeClass id="desktop"       x="0" y="10" width="0" height="100"/>
+        </size>
+        <size id="blockListContainer.title">
+            <sizeClass id="iPadPortrait"  x="0" y="0" width="748" height="40"/>
+            <sizeClass id="iPadLandscape" x="0" y="0" width="960" height="40"/>
+            <sizeClass id="desktop"       x="0" y="0" width="1260" height="25"/>
+        </size>
+        <size id="blockListEntry">
+            <sizeClass id="iPadPortrait"  x="0" y="20" width="748" height="70"/>
+            <sizeClass id="iPadLandscape" x="0" y="20" width="960" height="70"/>
+            <sizeClass id="desktop"       x="0" y="10" width="1260" height="30"/>
+        </size>
+        <!-- working area !-->
+        <size id="workingArea.dropArea">
+            <sizeClass id="iPadPortrait"  x="0" y="0" width="var:halfWidth" height="200"/>
+            <sizeClass id="iPadLandscape" x="0" y="0" width="var:halfWidth" height="140"/>
+            <sizeClass id="desktop"       x="0" y="0" width="var:halfWidth" height="100"/>
+        </size>
+        <size id="workingArea.campaign">
+            <sizeClass id="iPadPortrait"  x="var:halfWidth" y="0" width="var:halfWidth" height="200"/>
+            <sizeClass id="iPadLandscape" x="var:halfWidth" y="0" width="var:halfWidth" height="140"/>
+            <sizeClass id="desktop"       x="var:halfWidth" y="0" width="var:halfWidth" height="100"/>
+        </size>
+         <size id="workingArea.dropArea.entry">
+            <sizeClass id="iPadPortrait"  x="0" y="0" width="100" height="200"/>
+            <sizeClass id="iPadLandscape" x="0" y="0" width="70" height="140"/>
+            <sizeClass id="desktop"       x="0" y="0" width="70" height="100"/>
+        </size>
+         <size id="workingArea.closeButton">
+            <sizeClass id="iPadPortrait"  x="7" y="7" width="30" height="30"/>
+            <sizeClass id="iPadLandscape" x="7" y="7" width="30" height="30"/>
+            <sizeClass id="desktop"       x="5" y="5" width="25" height="25"/>
+        </size>
+
+        <!-- overlay !-->
+         <size id="overlay.blocklist">
+            <sizeClass id="iPadPortrait"  x="320" y="10" width="var:overlay.blocklist.width" height="780"/>
+            <sizeClass id="iPadLandscape" x="var:halfWidth+5" y="10" width="var:overlay.blocklist.width" height="548"/>
+            <sizeClass id="desktop"       x="var:halfWidth+5" y="10" width="var:overlay.blocklist.width" height="840"/>
+        </size>
+        <size id="overlay.insertTime">
+            <sizeClass id="iPadPortrait"  x="var:quarterWidth" y="10" width="var:threeQuarterWidth-20" height="780"/>
+            <sizeClass id="iPadLandscape" x="var:quarterWidth" y="10" width="var:threeQuarterWidth-20" height="548"/>
+            <sizeClass id="desktop"       x="var:quarterWidth" y="10" width="var:threeQuarterWidth-20" height="840"/>
+        </size>
+
+        <!-- overlay.blocklist !-->
+        <size id="overlay.blocklist.title">
+            <sizeClass id="iPadPortrait"  x="0" y="0" width="var:overlay.blocklist.width" height="30"/>
+            <sizeClass id="iPadLandscape" x="0" y="0" width="var:overlay.blocklist.width" height="30"/>
+            <sizeClass id="desktop"       x="0" y="0" width="var:overlay.blocklist.width" height="30"/>
+        </size>
+        <size id="overlay.blocklist.header">
+            <sizeClass id="iPadPortrait"  x="0" y="30" width="var:overlay.blocklist.width" height="30"/>
+            <sizeClass id="iPadLandscape" x="0" y="30" width="var:overlay.blocklist.width" height="30"/>
+            <sizeClass id="desktop"       x="0" y="30" width="var:overlay.blocklist.width" height="25"/>
+        </size>
+        <size id="overlay.blocklist.table">
+            <sizeClass id="iPadPortrait"  x="0" y="60" width="var:overlay.blocklist.width" height="720"/>
+            <sizeClass id="iPadLandscape" x="0" y="60" width="var:overlay.blocklist.width" height="488"/>
+            <sizeClass id="desktop"       x="0" y="55" width="var:overlay.blocklist.width" height="785"/>
+        </size>
+         <size id="overlay.blocklist.closeButton">
+            <sizeClass id="iPadPortrait"  x="var:overlay.blocklist.width-30" y="0" width="30" height="30"/>
+            <sizeClass id="iPadLandscape" x="var:overlay.blocklist.width-30" y="0" width="30" height="30"/>
+            <sizeClass id="desktop"       x="var:overlay.blocklist.width-30" y="2" width="25" height="25"/>
+        </size>
+         <size id="overlay.blocklist.errorMessage">
+            <sizeClass id="iPadPortrait"  x="0" y="680" width="var:overlay.blocklist.width" height="100"/>
+            <sizeClass id="iPadLandscape" x="0" y="448" width="var:overlay.blocklist.width" height="100"/>
+            <sizeClass id="desktop"       x="0" y="740" width="var:overlay.blocklist.width" height="100"/>
+        </size>
+        <size id="overlay.blocklist.entry">
+            <sizeClass id="iPadPortrait"  x="0" y="0" width="var:overlay.blocklist.width" height="50"/>
+            <sizeClass id="iPadLandscape" x="0" y="0" width="var:overlay.blocklist.width" height="50"/>
+            <sizeClass id="desktop"       x="0" y="0" width="var:overlay.blocklist.width" height="30"/>
+        </size>
+        <!-- overlay.insertTime !-->
+         <size id="overlay.insertTime.header">
+            <sizeClass id="iPadPortrait"  x="0" y="0" width="100%" height="80"/>
+            <sizeClass id="iPadLandscape" x="0" y="0" width="100%" height="80"/>
+            <sizeClass id="desktop"       x="0" y="0" width="100%" height="80"/>
+        </size>
+        <size id="overlay.insertTime.graph">
+            <sizeClass id="iPadPortrait"  x="0" y="80" width="100%" height="640"/>
+            <sizeClass id="iPadLandscape" x="0" y="80" width="100%" height="408"/>
+            <sizeClass id="desktop"       x="0" y="80" width="100%" height="720"/>
+        </size>
+        <size id="overlay.insertTime.touchBar">
+            <sizeClass id="iPadPortrait"  x="0" y="720" width="100%" height="80"/>
+            <sizeClass id="iPadLandscape" x="0" y="468" width="100%" height="80"/>
+            <sizeClass id="desktop"       x="0" y="760" width="100%" height="80"/>
+        </size>
+        <size id="overlay.insertTime.table">
+            <sizeClass id="iPadPortrait"  x="0" y="0" width="200" height="800"/>
+            <sizeClass id="iPadLandscape" x="0" y="0" width="200" height="800"/>
+            <sizeClass id="desktop"       x="0" y="0" width="200" height="800"/>
+        </size>
+        
+
+
+        <!-- overlay.small !-->
+        <size id="overlay.insertTime.small">
+            <sizeClass id="iPadPortrait"  x="10" y="10" width="300" height="330"/>
+            <sizeClass id="iPadLandscape" x="70" y="10" width="350" height="230"/>
+            <sizeClass id="desktop"       x="250" y="20" width="350" height="360"/>
+        </size>
+        <size id="overlay.workState.small">
+            <sizeClass id="iPadPortrait"  x="10" y="350" width="300" height="330"/>
+            <sizeClass id="iPadLandscape" x="70" y="250" width="350" height="230"/>
+            <sizeClass id="desktop"       x="250" y="460" width="350" height="360"/>
+        </size>
+       
+         <!-- overlay.insertTime.small !-->
+        <size id="overlay.insertTime.small.header">
+            <sizeClass id="iPadPortrait"  x="0" y="0" width="100%" height="40"/>
+            <sizeClass id="iPadLandscape" x="0" y="0" width="100%" height="30"/>
+            <sizeClass id="desktop"       x="0" y="0" width="100%" height="30"/>
+        </size>
+        <size id="overlay.insertTime.small.graph">
+            <sizeClass id="iPadPortrait"  x="0" y="40" width="100%" height="260"/>
+            <sizeClass id="iPadLandscape" x="0" y="30" width="100%" height="170"/>
+            <sizeClass id="desktop"       x="0" y="30" width="100%" height="300"/>
+        </size>
+        <size id="overlay.insertTime.small.touchBar">
+            <sizeClass id="iPadPortrait"  x="0" y="290" width="100%" height="30"/>
+            <sizeClass id="iPadLandscape" x="0" y="200" width="100%" height="30"/>
+            <sizeClass id="desktop"       x="0" y="330" width="100%" height="30"/>
+        </size>
+
+
+    </sizes>
+</sizing>
