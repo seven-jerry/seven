@@ -15,10 +15,23 @@ namespace seven {
         this.baseClass = sizeClass;
         this.classes.push(this.baseClass);
     }
+    setBaseClassById(id:string){
+        for(let sizeCLass of this.classes){
+            if(sizeCLass.getId() == id){
+                this.setBaseClass(sizeCLass);
+                return;
+            }
+        }
+    }
     getBaseClass(): ISizeClass {
         return this.baseClass;
     }
-    addSizeClasses(sizeCLass:ISizeClass):void{
+    addSizeClasses(sizeCLasses:Array<ISizeClass>):void{
+        for(let sizeCLass of sizeCLasses){
+            this.classes.push(sizeCLass);
+        }
+    }
+    addSizeClass(sizeCLass:ISizeClass):void{
         this.classes.push(sizeCLass);
     }
     getSizeClasses(): Array<ISizeClass> {

@@ -40,7 +40,7 @@ namespace storyboard {
 
         loadViewController(element:Element):ViewController{
                 var viewController = ViewController.fromXML(element);
-                viewController.view = this.loadView(element.getElementsByTagName("view")[0]);
+                viewController.view = this.loadView(element.getElementsByTagName("view")[0]); 
 
                 return viewController;
         }
@@ -67,6 +67,8 @@ namespace storyboard {
         var fileLoader = new FileLoader();
         fileLoader.document = storyboardXml;
         fileLoader.load();
+        SevenAdapter.shared();
+
     }
 }
 

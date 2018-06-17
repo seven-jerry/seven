@@ -17,6 +17,8 @@ namespace storyboard{
             }
             this.registry[id].push(callback);
         }
+
+        
     }
 
     export interface IObjectLoaded{
