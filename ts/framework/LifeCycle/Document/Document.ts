@@ -85,7 +85,7 @@ namespace seven {
     }
     public prepareLoading(){
         Objects.requireNonNull("DocumentDelegate.setup() document must not be null", document);
-        Objects.requireNonNull("DocumentDelegate.windowLoader must not be null", JBDocument.document().getWindowLoader());
+        Objects.requireNonNull("DocumentDelegate.windowLoader must not be null", this.windowLoader);
         Objects.requireNonNull("DocumentDelegate.resizeManager must not be null", this.resizeManager);
         Objects.requireNonNull("DocumentDelegate.sizeLoader must not be null", this.sizeLoader);
         this.windowLoader.setup(this);

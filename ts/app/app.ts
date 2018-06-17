@@ -1,5 +1,4 @@
 seven.onWindowLoad((window:seven.CanvasWindow)=>{
-    window.view.backgroudColor = "red";
   loadUmlObjects(window);
 });
 

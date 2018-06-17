@@ -7,8 +7,8 @@ namespace seven {
     export enum lineType {
         solid,
         dotted
-
     }
+    
     export interface IBorderExtendable {
         addBorder(border: Border);
     }
