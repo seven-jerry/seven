@@ -5,48 +5,52 @@
 */
 namespace seven {
     export class HtmlElementView extends View {
-    elementId: String;
-    element: HTMLElement;
-    backgroudColor: string;
-
-    constructor(elementId?: string) {
-        super();
-        if (elementId == undefined) {
-            return;
+        elementId: String;
+        element: HTMLElement;
+        /**
+         * 
+         * @param canvasId the html-id of the canvas
+         */
+        constructor(elementId: string) {
+            super();
+            this.elementId = elementId;
+            this.element = <HTMLElement>document.getElementById(elementId);
+            Object.freeze(this.element);
+            if (this.element) {
+                Logger.develepor("element already exists for Id : " + this.elementId);
+                return;
+            }
+            this.element = document.createElement(this.getType());
+            this.element.id = elementId;
+            this.element.style.position = "fixed";
+            this.element.style.display = "none";
+            document.body.appendChild(this.element);
         }
-        this.elementId = elementId;
-        this.element = <HTMLElement>document.getElementById(elementId);
-        if (this.element) {
-            Logger.error("Element already exists for Id : " + this.elementId);
-            return;
+
+
+
+        setSuperView(view: View) {
+            super.setSuperView(view);
+            this.element.style.display = "inline";
         }
 
-        this.element = document.createElement("div");
-        this.backgroundColor = ViewUtility.randomColor();
-        this.element.id = elementId;
-        this.element.style.position = "fixed";
-        this.element.style.display = "none";
-        document.body.appendChild(this.element);
-    }
+        drawInRect(rect: Rect) {
+            this.element.style.left = "" + rect.x() + "px";
+            this.element.style.top = "" + rect.y() + "px";
+            this.element.style.backgroundColor = this.style.getBackGroundColor();
+            this.element.style.width = "" + rect.width() + "px";
+            this.element.style.height = "" + rect.height() + "px";
+        }
 
-    setSuperView(view: View) {
-        super.setSuperView(view);
-        this.element.style.display = "inline";
+        remove(): void {
+            super.remove();
+            if (this.element && this.element.parentElement) {
+                this.element.parentElement.removeChild(this.element);
+            }
+        }
+
+        protected getType():string{
+            return "div";
+        }
     }
-    remove() {
-        this.element.style.display = "none";
-    }
-    draw(orgin: Orgin) {
-        var drawRect = Rect.copyRect(this.appliadFrame);
-        drawRect.setX(drawRect.x() + orgin.x);
-        drawRect.setY(drawRect.y() + orgin.y);
-        this.element.style.left = "" + drawRect.x() + "px";
-        this.element.style.top = "" + drawRect.y() + "px";
-        this.element.style.backgroundColor = ViewUtility.randomColor();
-        this.element.style.width = this.appliadFrame.width() + "px";
-        this.element.style.height = this.appliadFrame.height() + "px";
-        this.element.style.zIndex = "" + this.getZIndex();
-        this.drawSubViews(new Orgin(0, 0));
-    }
-}
 }

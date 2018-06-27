@@ -139,7 +139,7 @@ def addClasses(classes):
     global loadIndex
 
     classnames = getClassNames(loadClasses[loadIndex-1])
-
+    classnames.append("seven.JBObject")
     appendClassName = list()
 
     while len(classes) > 0 :
@@ -149,8 +149,6 @@ def addClasses(classes):
                 print clazz.classname
             return
         for clazz in classes:
-            if "ScrollTouchInterpreter" in clazz.classname:
-                print clazz.classname
             if clazz.extendname in classnames:
                 loadClasses[loadIndex].append(clazz)
                 classes.remove(clazz)
@@ -208,7 +206,7 @@ writeBypass()
 writeConfig()
 
 os.chdir("storyboard_out")
-process = subprocess.Popen("ntsc", shell=True, stdout=subprocess.PIPE)
+process = subprocess.Popen("tsc", shell=True, stdout=subprocess.PIPE)
 process.wait()
 os.chdir("..")
 
@@ -233,3 +231,5 @@ with open("storyboard_out/storyboard_in.js",'r')as r:
 
 
 shutil.copy2("storyboard_out/storyboard_out.js", 'storyboard_out.js')
+if os.path.exists("storyboard_out"):
+    shutil.rmtree('storyboard_out')

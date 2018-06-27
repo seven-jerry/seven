@@ -11,6 +11,6 @@ namespace seven {
     }
     interface ISizeProvider extends seven.IJBObject {
         getSizeRectForKey(key: string): seven.Rect;
-        getSizeForKey(key: string): seven.Size;
+       // getSizeForKey(key: string): seven.Size;
     }
 }

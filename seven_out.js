@@ -53,199 +53,6 @@ var seven;
         }
     }
     seven.AbstractMap = AbstractMap;
-/**
- * addd a border to a view object
- *
-*/
-    (function (lineType) {
-        lineType[lineType["solid"] = 0] = "solid";
-        lineType[lineType["dotted"] = 1] = "dotted";
-    })(seven.lineType || (seven.lineType = {}));
-    var lineType = seven.lineType;
-    function top(width, type, color) {
-        return new Border().intitWithSubBorders(new TopBorder().init(width, type, color));
-    }
-    seven.top = top;
-    function right(width, type, color) {
-        return new Border().intitWithSubBorders(new RightBorder().init(width, type, color));
-    }
-    seven.right = right;
-    function bottom(width, type, color) {
-        return new Border().intitWithSubBorders(new BottomBorder().init(width, type, color));
-    }
-    seven.bottom = bottom;
-    function left(width, type, color) {
-        return new Border().intitWithSubBorders(new LeftBorder().init(width, type, color));
-    }
-    seven.left = left;
-    function border(width, type, color) {
-        return new Border().intitWithSubBorders(new TotalBorder().init(width, type, color));
-    }
-    seven.border = border;
-    class Border {
-        constructor() {
-            this.subBorders = new Array();
-        }
-        /*   actually :HTMLElement, but typescript is being a bitch */
-        draw(element /*HTMLElement*/) {
-            seven.Logger.error("Border is drawable on generic view - be more specific");
-        }
-        intitWithSubBorders(...borders) {
-            this.subBorders = borders;
-            return this;
-        }
-        drawOnElement(element) {
-            for (let subBorder of this.subBorders) {
-                subBorder.drawOnElement(element);
-            }
-        }
-        drawInContext(context, rect) {
-            for (let subBorder of this.subBorders) {
-                subBorder.drawInContext(context, rect);
-            }
-        }
-    }
-    seven.Border = Border;
-    class SubBorder {
-        draw(element) {
-            seven.Logger.error("Border is drawable on generic view - be more specific");
-        }
-        getHtmlType() {
-            switch (this.type) {
-                case lineType.solid:
-                    return "solid";
-                case lineType.dotted:
-                    return "dotted";
-            }
-            return "";
-        }
-        getCanvas() {
-            switch (this.type) {
-                case lineType.solid:
-                    return [0, 0];
-                case lineType.dotted:
-                    return [5, 3];
-            }
-            return [0, 0];
-        }
-        changeSize(element, diff) {
-            var currentLeft = parseInt(element.style.left.replace("px", ""));
-            var currentTop = parseInt(element.style.top.replace("px", ""));
-            var currentWidth = parseInt(element.style.width.replace("px", ""));
-            var currentHeight = parseInt(element.style.height.replace("px", ""));
-            var currentElWidth = parseInt(element.width);
-            var currentElHeight = parseInt(element.height);
-            if (currentElWidth != NaN) {
-                element.width = currentElWidth - diff.width();
-            }
-            else {
-                element.style.width = (currentWidth - diff.width()) + "px";
-            }
-            if (currentElHeight != NaN) {
-                element.height = currentElHeight - diff.height();
-            }
-            else {
-                element.style.height = (currentHeight - diff.height()) + "px";
-            }
-            element.style.left = (currentLeft + diff.x()) + "px";
-            element.style.top = (currentTop + diff.y()) + "px";
-        }
-        init(width, type, color) {
-            this.width = width;
-            this.type = type;
-            this.color = color;
-            return this;
-        }
-        drawOnElement(element) {
-            throw new Error("Method not implemented.");
-        }
-        drawInContext(context, rect) {
-            throw new Error("Method not implemented.");
-        }
-    }
-    class TopBorder extends SubBorder {
-        drawOnElement(element) {
-            var useWidth = seven.JBDocument.document().verticalScreenValue(this.width);
-            element.style.borderTop = "" + useWidth + "px " + this.getHtmlType() + " " + this.color;
-            this.changeSize(element, new seven.Rect(0, useWidth, 0, 0));
-        }
-        drawInContext(context, rect) {
-            var useWidth = seven.JBDocument.document().verticalScreenValue(this.width);
-            context.save();
-            context.strokeStyle = this.color;
-            context.setLineDash(this.getCanvas());
-            context.lineWidth = useWidth;
-            context.moveTo(0, 0);
-            context.lineTo(rect.topRight(), rect.bottomLeft() - useWidth);
-            context.restore();
-        }
-    }
-    class RightBorder extends SubBorder {
-        drawOnElement(element) {
-            var useWidth = seven.JBDocument.document().horizontalScreenValue(this.width);
-            element.style.borderRight = "" + useWidth + "px " + this.getHtmlType() + " " + this.color;
-            this.changeSize(element, new seven.Rect(0, 0, useWidth, 0));
-        }
-        drawInContext(context, rect) {
-            context.save();
-            context.strokeStyle = this.color;
-            context.setLineDash(this.getCanvas());
-            context.lineWidth = this.width;
-            context.moveTo(rect.topRight() - this.width, 0);
-            context.lineTo(rect.topRight(), rect.bottomLeft() - this.width);
-            context.restore();
-        }
-    }
-    class BottomBorder extends SubBorder {
-        drawOnElement(element) {
-            var useWidth = seven.JBDocument.document().verticalScreenValue(this.width);
-            element.style.borderBottom = "" + useWidth + "px " + this.getHtmlType() + " " + this.color;
-            this.changeSize(element, new seven.Rect(0, 0, 0, useWidth));
-        }
-        drawInContext(context, rect) {
-            context.save();
-            context.strokeStyle = this.color;
-            context.setLineDash(this.getCanvas());
-            context.lineWidth = this.width;
-            context.moveTo(0, rect.bottomLeft() - this.width);
-            context.lineTo(rect.topRight(), rect.bottomLeft() - this.width);
-            context.restore();
-        }
-    }
-    class LeftBorder extends SubBorder {
-        drawOnElement(element) {
-            var useWidth = seven.JBDocument.document().horizontalScreenValue(this.width);
-            element.style.borderLeft = "" + useWidth + "px " + this.getHtmlType() + " " + this.color;
-            this.changeSize(element, new seven.Rect(useWidth, 0, 0, 0));
-        }
-        drawInContext(context, rect) {
-            context.save();
-            context.strokeStyle = this.color;
-            context.setLineDash(this.getCanvas());
-            context.lineWidth = this.width;
-            context.moveTo(0, 0);
-            context.lineTo(0, rect.bottomLeft() - this.width);
-            context.restore();
-        }
-    }
-    class TotalBorder extends SubBorder {
-        drawOnElement(element) {
-            element.style.border = "" + this.width + "px " + this.getHtmlType() + " " + this.color;
-            this.changeSize(element, new seven.Rect(this.width, this.width, this.width, this.width));
-        }
-        drawInContext(context, rect) {
-            context.save();
-            context.strokeStyle = this.color;
-            context.setLineDash(this.getCanvas());
-            context.lineWidth = this.width;
-            context.moveTo(0, 0);
-            context.lineTo(rect.topRight() - this.width, 0);
-            context.lineTo(rect.topRight() - this.width, rect.bottomLeft() - this.width);
-            context.lineTo(0, rect.bottomLeft() - this.width);
-            context.lineTo(0, 0);
-            context.restore();
-        }
-    }
     class Callback {
         constructor(thisRef, method) {
             this.thisRef = thisRef;
@@ -272,10 +79,13 @@ var seven;
             this.thisRef = thisRef;
             this.method = method;
         }
+        getClassName() { return VoidCallback.classname; }
         call() {
             this.method.call(this.thisRef);
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    VoidCallback.classname = "seven.VoidCallback";
     seven.VoidCallback = VoidCallback;
 //{INSERTORDER:10}
     /**
@@ -283,12 +93,14 @@ var seven;
      */
     class ClassLoader {
         constructor() {
+            //AutoGeneratedClassName-end - do not eidt this line
             this.constructedClasses = {};
             this.loadClasses = new Array();
             this.priorityClass = Array();
             this.priorityClasses = {};
             this.afterClasses = {};
         }
+        getClassName() { return ClassLoader.classname; }
         static manager() {
             if (ClassLoader._instance == undefined) {
                 ClassLoader._instance = new ClassLoader();
@@ -323,8 +135,10 @@ var seven;
             }
             for (let className of this.loadClasses) {
                 //  try {
-                seven.Logger.log(className);
                 var classObject = eval(className + ".loadedInstance();");
+                /*} catch (e) {
+                    Logger.error("ClassLoader - No Class found for classname");
+                }*/
             }
         }
         hasLoaded(classname) {
@@ -351,15 +165,23 @@ var seven;
             this.afterClasses[afterName] = currentClasses;
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    ClassLoader.classname = "seven.ClassLoader";
     seven.ClassLoader = ClassLoader;
 //{INSERTORDER:2}
     class Color {
+        getClassName() { return Color.classname; }
+        //AutoGeneratedClassName-end - do not eidt this line
         static transparent() {
             return "rgba(0,0,0,0.0)";
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    Color.classname = "seven.Color";
     seven.Color = Color;
     class CookieManager {
+        getClassName() { return CookieManager.classname; }
+        //AutoGeneratedClassName-end - do not eidt this line
         setCookie(name, value, expireHours) {
             try {
                 localStorage.setItem(name, value);
@@ -463,25 +285,62 @@ var seven;
             }
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    CookieManager.classname = "seven.CookieManager";
     seven.CookieManager = CookieManager;
-    class DefaultValues {
-        constructor() {
-        }
-        setupDefaultValues(callback) {
-            if (this.callback) {
-                seven.Logger.error("DefaultValues - setupDefaultValues has not finished ");
+    class DefaultRenderer {
+        getClassName() { return DefaultRenderer.classname; }
+        //AutoGeneratedClassName-end - do not eidt this line
+        loadIfDefault() {
+            if (seven.JBDocument.document().hasRenderer() == false) {
+                seven.Logger.boot("no renderer found -- using default");
+                seven.JBDocument.document().setRenderer(this);
             }
-            this.callback = callback;
-            var manager = seven.UserDefaults.defaultManager().synchronize(new seven.VoidCallback(this, this.synced));
         }
-        synced() {
-            //  UserDefaults.defaultManager().setObjectForKey(UserDefaultKey.PVS_BLO9_NAME,"BLO9",StoringType.LOCAL,Override.FALSE);
-            //   UserDefaults.defaultManager().setObjectForKey(UserDefaultKey.PVS_BLO9_AMOUNT,"10",StoringType.LOCAL,Override.FALSE);            
-            seven.UserDefaults.defaultManager().synchronize(this.callback);
+        renderViewHierachy(superView) {
+            for (let subView of superView.getSubViews()) {
+                subView.drawInRect(subView.frame);
+                this.drawSubView(subView);
+            }
+        }
+        drawSubView(view) {
+            for (let subView of view.getSubViews()) {
+                subView.drawInRect(subView.frame);
+                this.drawSubView(subView);
+            }
         }
     }
-    seven.DefaultValues = DefaultValues;
+    //AutoGeneratedClassName-start - do not eidt this line
+    DefaultRenderer.classname = "seven.DefaultRenderer";
+    seven.DefaultRenderer = DefaultRenderer;
+    class DefaultStyleProvider {
+        constructor() {
+            //AutoGeneratedClassName-end - do not eidt this line
+            this.backgroundColor = "white";
+            this.strokeColor = "black";
+        }
+        getClassName() { return DefaultStyleProvider.classname; }
+        setBackgroundColor(color) {
+            this.backgroundColor = color;
+        }
+        getBackGroundColor() {
+            return this.backgroundColor;
+        }
+        isHidden() {
+            return this.hide;
+        }
+        setHidden(hide) {
+            this.hide = hide;
+        }
+        getStrokeColor() {
+            return this.strokeColor;
+        }
+    }
+    //AutoGeneratedClassName-start - do not eidt this line
+    DefaultStyleProvider.classname = "seven.DefaultStyleProvider";
+    seven.DefaultStyleProvider = DefaultStyleProvider;
     class DefaultWindowLoader {
+        getClassName() { return DefaultWindowLoader.classname; }
         loadIfDefault() {
             if (seven.JBDocument.document().hasWindowLoader() == false) {
                 seven.Logger.boot("no window loader found -- using default");
@@ -492,16 +351,18 @@ var seven;
             this.document = document;
         }
         loadWindows(sizeClass) {
-            var window = new seven.CanvasWindow().initWithCanvasID('main');
-            window.view.initWithReferenceFrame(new seven.Rect(0, 0, 1000, 800));
+            var window = new seven.CanvasWindow().initWithId('main', new seven.Rect(0, 0, 1000, 800), new seven.ViewController());
             this.document.addSubWindow(window);
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    DefaultWindowLoader.classname = "seven.DefaultWindowLoader";
     seven.DefaultWindowLoader = DefaultWindowLoader;
     class UniqueKeyEnumation {
         constructor() {
             this.keys = new Array();
         }
+        getClassName() { return UniqueKeyEnumation.classname; }
         hasKey(key) {
             var hasKey = 0;
             this.keys.forEach(element => {
@@ -527,6 +388,8 @@ var seven;
             this.keys.push(key);
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    UniqueKeyEnumation.classname = "seven.UniqueKeyEnumation";
     seven.UniqueKeyEnumation = UniqueKeyEnumation;
     class JBFunction {
     }
@@ -536,16 +399,20 @@ var seven;
             this.thisRef = thisRef;
             this.method = method;
         }
+        getClassName() { return ImageLoadedCallback.classname; }
         call(image) {
             this.method.call(this.thisRef, image);
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    ImageLoadedCallback.classname = "seven.ImageLoadedCallback";
     seven.ImageLoadedCallback = ImageLoadedCallback;
     class JMBIterator {
         constructor(arr) {
             this.index = 0;
             this.inputArray = arr;
         }
+        getClassName() { return JMBIterator.classname; }
         hasNext() {
             return this.index < this.inputArray.length;
         }
@@ -558,12 +425,15 @@ var seven;
             return nextElement;
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    JMBIterator.classname = "seven.JMBIterator";
     seven.JMBIterator = JMBIterator;
     class JBNotificationCenter {
         /* private */ constructor() {
             this.observers = new seven.JMBMap();
             this.priorityObservers = new seven.JMBMap();
         }
+        getClassName() { return JBNotificationCenter.classname; }
         static touchEventManager() {
             if (JBNotificationCenter._touchEventCenter == undefined) {
                 JBNotificationCenter._touchEventCenter = new JBNotificationCenter();
@@ -654,19 +524,16 @@ var seven;
             }
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    JBNotificationCenter.classname = "seven.JBNotificationCenter";
     seven.JBNotificationCenter = JBNotificationCenter;
 //{INSERTORDER:1}
     class JBObject {
+        //AutoGeneratedClassName-end - do not eidt this line
         constructor() {
-            this.className = this.constructor.name;
             seven.ClassLoader.manager().hasLoaded(this.getClassName());
         }
-        getClassName() {
-            if (this.className == undefined) {
-                seven.Logger.error("classname was not defined");
-            }
-            return this.className;
-        }
+        getClassName() { return JBObject.classname; }
         equals(object) {
             if (object == undefined) {
                 return false;
@@ -679,10 +546,9 @@ var seven;
             return 0;
         }
         toString() {
-            return this.className;
+            return this.getClassName();
         }
         copyAttributes(toObject) {
-            toObject.className = this.className;
         }
         copy() {
             var newObject = new JBObject();
@@ -690,63 +556,12 @@ var seven;
             return newObject;
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    JBObject.classname = "seven.JBObject";
     seven.JBObject = JBObject;
-    class LeadingContraint {
-        constructor() {
-            this.leading = 20;
-        }
-        applyContraint(srcView, comparingView) {
-            srcView.referenceFrame.setX(this.leading);
-        }
-        init(leading) {
-            this.leading = leading;
-            return this;
-        }
-        getClassName() {
-            return LeadingContraint.className;
-        }
-    }
-    LeadingContraint.className = "seven.constraint.LeadingContraint";
-    seven.LeadingContraint = LeadingContraint;
-    class LocalContainer {
-        constructor() {
-            this.keepDuration = 2;
-            this.cookiePrefix = "USERDEFAULTS";
-            this.container = new seven.JMBMap();
-            this.syncContainer = new seven.JMBMap();
-            this.cookieManager = new seven.CookieManager();
-        }
-        setCookieManager(manager) {
-            this.cookieManager = manager;
-        }
-        setObjectForKey(key, object) {
-            this.syncContainer.put(key, object);
-        }
-        deleteObjectForKey(key) {
-            this.cookieManager.deleteCookie(this.cookiePrefix + key);
-        }
-        synchronize(callBack) {
-            seven.Objects.requireNonNull("cookie manager must not be null", this.cookieManager);
-            // set the entries to the cookie storage
-            for (let key of this.syncContainer.keys()) {
-                let object = this.syncContainer.get(key);
-                this.cookieManager.setCookie(this.cookiePrefix + key, object, this.keepDuration);
-            }
-            this.syncContainer = new seven.JMBMap();
-            var allElements = this.cookieManager.getCookieStartWithNeedle(this.cookiePrefix);
-            var buildContainer = new seven.JMBMap();
-            for (let key of allElements.keys()) {
-                var strippedKey = parseInt(key.replace(this.cookiePrefix, ""));
-                buildContainer.put(strippedKey, allElements.get(key));
-            }
-            if (callBack) {
-                callBack.call(buildContainer);
-            }
-        }
-    }
-    seven.LocalContainer = LocalContainer;
     class Logger {
         constructor() { }
+        getClassName() { return Logger.classname; }
         static only(args) {
             console.log(args);
             Logger.onlyFlag = true;
@@ -822,31 +637,18 @@ var seven;
             return buildMessage;
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    Logger.classname = "seven.Logger";
+    //AutoGeneratedClassName-end - do not eidt this line
     Logger.onlyFlag = false;
     Logger.noLogging = false;
     seven.Logger = Logger;
 window.onerror = function (error) {
     seven.Logger.error(error.toString(), true);
 };
-    class MinHeight {
-        applyContraint(srcView, comparingView) {
-            if (srcView.referenceFrame.height() < this.minHeight) {
-                srcView.referenceFrame.setHeight(this.minHeight);
-                srcView.changeReferenceFrame(srcView.referenceFrame);
-            }
-            // srcView.appliadFrame.setX(comparingView.appliadFrame.topRight() - srcView.appliadFrame.width() - this.leading);
-        }
-        init(minHeight) {
-            this.minHeight = minHeight;
-            return this;
-        }
-        getClassName() {
-            return MinHeight.className;
-        }
-    }
-    MinHeight.className = "seven.constraint.MinHeight";
-    seven.MinHeight = MinHeight;
     class Objects {
+        getClassName() { return Objects.classname; }
+        //AutoGeneratedClassName-end - do not eidt this line
         Objects() {
         }
         static requireNonNull(message, object) {
@@ -873,6 +675,8 @@ window.onerror = function (error) {
             return replacement;
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    Objects.classname = "seven.Objects";
     seven.Objects = Objects;
     class Observer {
         constructor(thisRef, method, userInfo) {
@@ -880,12 +684,16 @@ window.onerror = function (error) {
             this.method = method;
             this.userInfo = userInfo;
         }
+        getClassName() { return Observer.classname; }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    Observer.classname = "seven.Observer";
     seven.Observer = Observer;
     class On {
         constructor() {
             this.registry = {};
         }
+        getClassName() { return On.classname; }
         static on() {
             if (On._instance == undefined) {
                 On._instance = new On();
@@ -907,6 +715,8 @@ window.onerror = function (error) {
             }
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    On.classname = "seven.On";
     seven.On = On;
     function on(action, method) {
         On.on().register(action, method);
@@ -916,23 +726,6 @@ window.onerror = function (error) {
         On.on().register("windowDidLoad", method);
     }
     seven.onWindowLoad = onWindowLoad;
-    class RemoteContainer {
-        constructor() {
-            this.container = new seven.JMBMap();
-            this.syncContainer = new seven.JMBMap();
-        }
-        setObjectForKey(key, object) {
-            this.syncContainer.put(key, object);
-        }
-        deleteObjectForKey(key) {
-            this.container.remove(key);
-        }
-        synchronize(callBack) {
-            //load the entries to server
-            callBack.call(this.container);
-        }
-    }
-    seven.RemoteContainer = RemoteContainer;
 //{INSERTORDER:4}
 /**
  * This class provides the default implementation for the resize Manager
@@ -944,22 +737,23 @@ window.onerror = function (error) {
             this.hasRegistered = false;
             this.userScale = 0;
         }
+        getClassName() { return ResizeManager.classname; }
         /**
          * This gives the instance, which was loaded by the Classloader
          * You can use this to access this instance afterwoulds-or don't, you decide
          */
         static loadedInstance() {
-            var loadedInstance = seven.ClassLoader.manager().getLoadedInstance(ResizeManager.className);
+            var loadedInstance = seven.ClassLoader.manager().getLoadedInstance(ResizeManager.classname);
             if (loadedInstance != undefined) {
                 seven.JBDocument.document().setResizeManager(loadedInstance);
                 return loadedInstance;
             }
             var resize = new ResizeManager();
             seven.JBDocument.document().setResizeManager(resize);
+            seven.on("documentInitSize", () => {
+                resize.handleResize(window.innerWidth, window.innerHeight);
+            });
             return resize;
-        }
-        getClassName() {
-            return ResizeManager.className;
         }
         /**
         * Here we register as the resizeManager
@@ -976,7 +770,7 @@ window.onerror = function (error) {
             this.handleResize(window.innerWidth, window.innerHeight);
         }
         resize() {
-            this.handleResize(this.document.doucmentView.referenceFrame.width(), this.document.doucmentView.referenceFrame.height());
+            this.handleResize(this.document.doucmentView.frame.width(), this.document.doucmentView.frame.height());
         }
         hasSizeClass() {
             return this.activeSizeClass != undefined;
@@ -989,14 +783,14 @@ window.onerror = function (error) {
             if (this.document == undefined || this.document.doucmentView == undefined) {
                 return value;
             }
-            return (value / resizeSizeClass.getHeight()) * this.document.doucmentView.referenceFrame.height();
+            return (value / resizeSizeClass.getHeight()) * this.document.doucmentView.frame.height();
         }
         horizontalScreenValue(value, useBaseClass = true) {
             var resizeSizeClass = this.resizeSizeClass(useBaseClass);
             if (this.document == undefined || this.document.doucmentView == undefined) {
                 return value;
             }
-            return (value / resizeSizeClass.getWidth()) * this.document.doucmentView.referenceFrame.width();
+            return (value / resizeSizeClass.getWidth()) * this.document.doucmentView.frame.width();
         }
         verticalReferenceValue(value, useBaseClass = true) {
             var resizeSizeClass = this.resizeSizeClass(useBaseClass);
@@ -1029,7 +823,7 @@ window.onerror = function (error) {
                 return;
             }
             this.userScale = userScaleChange;
-            this.document.doucmentView.initWithReferenceFrame(new seven.Rect(0, 0, newWidth, newHeight));
+            this.document.doucmentView.initWitFrame(new seven.Rect(0, 0, newWidth, newHeight));
             seven.JBDocument.document().getSizeLoader().changeSizeClass(newWidth, newHeight);
             var nextSizeClass = seven.JBDocument.document().getSizeLoader().getSizeClass();
             this.baseSizeClass = seven.JBDocument.document().getSizeLoader().getBaseClass();
@@ -1058,55 +852,37 @@ window.onerror = function (error) {
             };
         }
     }
-    ResizeManager.className = "seven.ResizeManager";
+    //AutoGeneratedClassName-start - do not eidt this line
+    ResizeManager.classname = "seven.ResizeManager";
     seven.ResizeManager = ResizeManager;
-seven.ClassLoader.manager().loadInstance(seven.ResizeManager.className);
-    class Size {
-        constructor(id) {
-            this.classes = new Array();
-            this.id = id;
-        }
-        static fromXML(xml, sizeLoader, variables) {
-            var id = seven.Objects.requireNonNull("Size.fromXML : id was not defined", xml.attributes.getNamedItem("id").value);
-            var size = new Size(id);
-            let xmlChidren = xml.getElementsByTagName("sizeClass");
-            for (let xmlChild of xmlChidren) {
-                var sizeFrame = seven.SizeFrame.fromXML(xmlChild, sizeLoader, variables, id);
-                size.classes.push(sizeFrame);
-            }
-            return size;
-        }
-        getFrameFromId(id) {
-            for (let everyClass of this.classes) {
-                if (everyClass.getId() == id) {
-                    return everyClass.getFrame();
-                }
-            }
-            return undefined;
-        }
-        getFrameForClass(sizeClass) {
-            for (let everyClass of this.classes) {
-                if (sizeClass.getId() == everyClass.getId()) {
-                    return everyClass.getFrame();
-                }
-            }
-            return undefined;
-        }
-    }
-    seven.Size = Size;
+seven.ClassLoader.manager().loadInstance(seven.ResizeManager.classname);
     class SizeCatalog {
         constructor(name) {
             this.classes = new Array();
             this.name = name;
         }
+        getClassName() { return SizeCatalog.classname; }
         setBaseClass(sizeClass) {
             this.baseClass = sizeClass;
             this.classes.push(this.baseClass);
         }
+        setBaseClassById(id) {
+            for (let sizeCLass of this.classes) {
+                if (sizeCLass.getId() == id) {
+                    this.setBaseClass(sizeCLass);
+                    return;
+                }
+            }
+        }
         getBaseClass() {
             return this.baseClass;
         }
-        addSizeClasses(sizeCLass) {
+        addSizeClasses(sizeCLasses) {
+            for (let sizeCLass of sizeCLasses) {
+                this.classes.push(sizeCLass);
+            }
+        }
+        addSizeClass(sizeCLass) {
             this.classes.push(sizeCLass);
         }
         getSizeClasses() {
@@ -1165,106 +941,12 @@ seven.ClassLoader.manager().loadInstance(seven.ResizeManager.className);
             return this.currentSizeClass || this.baseClass;
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    SizeCatalog.classname = "seven.SizeCatalog";
     seven.SizeCatalog = SizeCatalog;
-    class SizeFrame {
-        constructor(id, x, y, width, height) {
-            this.id = id;
-            this.frame = new seven.Rect(x, y, width, height);
-        }
-        static fromXML(xml, sizeLoader, variables, superId) {
-            var id = seven.Objects.requireNonNull("SizeFrame.fromXML : id was not defined", xml.attributes.getNamedItem("id").value);
-            var xmlX = seven.Objects.requireNonNull("SizeFrame.fromXML : x was not defined", xml.attributes.getNamedItem("x").value);
-            var superSizeCLass = sizeLoader.getSizeForKey(superId.substring(0, superId.lastIndexOf(".")));
-            var superCLassId = "";
-            var rect = seven.Rect.empty();
-            if (superSizeCLass != undefined) {
-                superCLassId = superSizeCLass.id;
-                rect = superSizeCLass.getFrameFromId(id);
-            }
-            var x = SizeFrame.getNumber(id, xmlX, rect.x(), superId, variables);
-            var xmlY = seven.Objects.requireNonNull("SizeFrame.fromXML : y was not defined", xml.attributes.getNamedItem("y").value);
-            var y = SizeFrame.getNumber(id, xmlY, rect.y(), superId, variables);
-            var xmlWidth = seven.Objects.requireNonNull("SizeFrame.fromXML : width was not defined", xml.attributes.getNamedItem("width").value);
-            var width = SizeFrame.getNumber(id, xmlWidth, rect.width(), superId, variables);
-            var xmlHeight = seven.Objects.requireNonNull("SizeFrame.fromXML : height was not defined", xml.attributes.getNamedItem("height").value);
-            var height = SizeFrame.getNumber(id, xmlHeight, rect.height(), superId, variables);
-            return new SizeFrame(id, x, y, width, height);
-        }
-        static getNumber(id, object, maxNumber, superClassId, variables) {
-            if (typeof object == "number") {
-                return object;
-            }
-            if (object.indexOf("%") != -1) {
-                var percentValue = seven.Objects.requireNumber("SizeFrame::getNumber : number is not a percentvalue", object.substring(0, object.indexOf("%")));
-                var testString = object.substring(0, object.indexOf("%") + 1);
-                if (maxNumber == 0) {
-                    throw new Error("SizeFrame.getNumber : <" + superClassId + "> if you use precent values you have to define a super size to reference to. in your case it would be <" + superClassId.substring(0, superClassId.lastIndexOf(".")) + "> ");
-                }
-                object = object.replace(testString, "" + (maxNumber * 100 / percentValue));
-            }
-            if (typeof object == "string" && object.indexOf("var") != 0) {
-                object = parseInt(object);
-                if (object != NaN) {
-                    return object;
-                }
-            }
-            if (typeof object == "string" && object.indexOf("var") == 0) {
-                var testFroVar = object.trim().replace("var:", "");
-                var resultObj = SizeFrame.extractOperation(testFroVar);
-                testFroVar = resultObj.source;
-                if (variables.containsKey(testFroVar) == true) {
-                    var variable = variables.get(testFroVar);
-                    var varValue = variable.getProperty(id);
-                    return SizeFrame.applyOperation(varValue, resultObj.operation, resultObj.value);
-                }
-            }
-            throw new Error("SizeFrame.fromXML : <" + object + "> could not be converted to number");
-        }
-        static extractOperation(sourceString) {
-            var operationIndex = 0;
-            var operationFound = undefined;
-            var operationValue = 0;
-            var operations = ["+", "-", "*", "/"];
-            while (operationFound == undefined && operationIndex < operations.length) {
-                var testOperation = operations[operationIndex];
-                operationIndex++;
-                if (sourceString.indexOf(testOperation) != -1) {
-                    operationFound = testOperation;
-                }
-            }
-            if (operationFound != undefined) {
-                var operation = sourceString.substring(sourceString.indexOf(operationFound) + 1);
-                if (parseInt(operation) != NaN) {
-                    operationValue = parseInt(operation);
-                }
-                sourceString = sourceString.substring(0, sourceString.indexOf(operationFound)).trim();
-            }
-            return { "source": sourceString, "operation": operationFound, "value": operationValue };
-        }
-        static applyOperation(source, operation, value) {
-            if (operation == "+") {
-                return source + value;
-            }
-            if (operation == "-") {
-                return source - value;
-            }
-            if (operation == "*") {
-                return source * value;
-            }
-            if (operation == "/") {
-                return source / value;
-            }
-            return source;
-        }
-        getId() {
-            return this.id;
-        }
-        getFrame() {
-            return this.frame;
-        }
-    }
-    seven.SizeFrame = SizeFrame;
     class SizeLoadOption {
+        getClassName() { return SizeLoadOption.classname; }
+        //AutoGeneratedClassName-end - do not eidt this line
         isMobileDevice() {
             if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
                 return true;
@@ -1278,12 +960,15 @@ seven.ClassLoader.manager().loadInstance(seven.ResizeManager.className);
             return true;
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    SizeLoadOption.classname = "seven.SizeLoadOption";
     seven.SizeLoadOption = SizeLoadOption;
     class SizeNotifier {
         /* private */ constructor() {
             this.observers = {};
         }
-        /* syncronized */ static notifier() {
+        getClassName() { return SizeNotifier.classname; }
+        static notifier() {
             if (SizeNotifier._notifier == undefined) {
                 SizeNotifier._notifier = new SizeNotifier();
             }
@@ -1324,26 +1009,20 @@ seven.ClassLoader.manager().loadInstance(seven.ResizeManager.className);
             }
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    SizeNotifier.classname = "seven.SizeNotifier";
     seven.SizeNotifier = SizeNotifier;
-    var SizeNotifyOptions;
+    let SizeNotifyOptions;
     (function (SizeNotifyOptions) {
         SizeNotifyOptions[SizeNotifyOptions["NONE"] = 0] = "NONE";
         SizeNotifyOptions[SizeNotifyOptions["SIZE_CLASS_CHANGE"] = 1] = "SIZE_CLASS_CHANGE";
     })(SizeNotifyOptions || (SizeNotifyOptions = {}));
-    class UserDefaultStorageCallback {
-        constructor(thisRef, method) {
-            this.thisRef = thisRef;
-            this.method = method;
-        }
-        call(map) {
-            this.method.call(this.thisRef, map);
-        }
-    }
-    seven.UserDefaultStorageCallback = UserDefaultStorageCallback;
     class Timer {
         constructor() {
+            //AutoGeneratedClassName-end - do not eidt this line
             this.timeoutTimer = undefined;
         }
+        getClassName() { return Timer.classname; }
         timeout(time, callback) {
             this.timeoutCallback = callback;
             this.stop();
@@ -1363,31 +1042,11 @@ seven.ClassLoader.manager().loadInstance(seven.ResizeManager.className);
             this.timeoutTimer = undefined;
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    Timer.classname = "seven.Timer";
     seven.Timer = Timer;
-    class Top {
-        constructor() {
-            this.top = 0;
-        }
-        applyContraint(srcView, comparingView) {
-            if (this.topView != undefined) {
-                srcView.referenceFrame.setY(this.topView.referenceFrame.bottomLeft() + this.top);
-                return;
-            }
-            srcView.referenceFrame.setY(this.top);
-            srcView.changeReferenceFrame(srcView.referenceFrame);
-        }
-        init(top, comparingView) {
-            this.top = top;
-            this.topView = comparingView;
-            return this;
-        }
-        getClassName() {
-            return Top.className;
-        }
-    }
-    Top.className = "seven.constraint.Top";
-    seven.Top = Top;
     class UserAgent {
+        getClassName() { return UserAgent.classname; }
         static userAgent() {
             if (UserAgent._instance == undefined) {
                 UserAgent._instance = new seven.ClassLoader();
@@ -1398,134 +1057,24 @@ seven.ClassLoader.manager().loadInstance(seven.ResizeManager.className);
             return (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0));
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    UserAgent.classname = "seven.UserAgent";
     seven.UserAgent = UserAgent;
-    class UserDefaults {
-        constructor() {
-            this.objects = new seven.JMBMap();
-            this.callback = new Array();
-        }
-        /* Object Creation */
-        static defaultManager() {
-            if (UserDefaults._instance == undefined) {
-                UserDefaults._instance = new UserDefaults();
-                UserDefaults._instance.setLocalContainer(new seven.LocalContainer());
-                UserDefaults._instance.setRemoteContainer(new seven.RemoteContainer());
-            }
-            return UserDefaults._instance;
-        }
-        /* IUserDefaultsSetter */
-        setLocalContainer(localContainer) {
-            this.localContainer = localContainer;
-        }
-        setRemoteContainer(remoteContainer) {
-            this.remoteContainer = remoteContainer;
-        }
-        synchronize(callBack) {
-            this.callback.push(callBack);
-            if (this.callback.length > 1) {
-                return;
-            }
-            var that = this;
-            setTimeout(function () {
-                console.log("start syncing " + that.callback.length);
-                that.objects = new seven.JMBMap();
-                that.localContainer.synchronize(new seven.UserDefaultStorageCallback(that, that.localStorageReady));
-            }, 30);
-        }
-        localStorageReady(map) {
-            this.fillContainer(map);
-            this.remoteContainer.synchronize(new seven.UserDefaultStorageCallback(this, this.remoteStorageReady));
-        }
-        remoteStorageReady(map) {
-            this.fillContainer(map);
-            var tempCall = this.callback;
-            this.callback = new Array();
-            console.log("remoteStorageReady " + tempCall.length);
-            for (let callback of tempCall) {
-                callback.call();
-            }
-        }
-        fillContainer(objects) {
-            try {
-                for (let key of objects.keys()) {
-                    var object = objects.get(key);
-                    this.objects.put(key, object);
-                }
-            }
-            catch (e) {
-                seven.Logger.error("UserDefaults : setObjects : " + e.message);
-            }
-        }
-        setObjects(objects, type, override) {
-            try {
-                for (let key of objects.keys()) {
-                    var object = objects.get(key);
-                    this.setObjectForKey(key, object, type, override);
-                }
-            }
-            catch (e) {
-                seven.Logger.error("UserDefaults : setObjects : " + e.message);
-            }
-        }
-        setObjectForKey(key, object, type, override) {
-            if (override == seven.Override.FALSE && this.objects.get(key) != undefined) {
-                seven.Logger.error("UserDefaults : setObjectForKey : has object and should not override ");
-                return;
-            }
-            switch (type) {
-                case seven.StoringType.ALL:
-                    this.localContainer.setObjectForKey(key, object);
-                    this.remoteContainer.setObjectForKey(key, object);
-                    break;
-                case seven.StoringType.LOCAL:
-                    this.localContainer.setObjectForKey(key, object);
-                    break;
-                case seven.StoringType.REMOTE:
-                    this.remoteContainer.setObjectForKey(key, object);
-                    break;
-            }
-        }
-        getEntries() {
-            return this.objects;
-        }
-    }
-    seven.UserDefaults = UserDefaults;
     class UserInfo {
+        getClassName() { return UserInfo.classname; }
+        //AutoGeneratedClassName-end - do not eidt this line
         static clientInfo() {
             return new seven.SizeLoadOption();
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    UserInfo.classname = "seven.UserInfo";
     seven.UserInfo = UserInfo;
-    class Variable {
-        constructor(id) {
-            this.values = new seven.JMBMap();
-            this.id = id;
-        }
-        static fromXML(xml) {
-            var id = seven.Objects.requireNonNull("Variable.fromXML : id was not defined", xml.attributes.getNamedItem("id").value);
-            var size = new Variable(id);
-            let xmlChidren = xml.getElementsByTagName("sizeClass");
-            for (let xmlChild of xmlChidren) {
-                Variable.sizeClassValue(size, xmlChild);
-            }
-            return size;
-        }
-        static sizeClassValue(destination, xml) {
-            var classId = seven.Objects.requireNonNull("Variable.sizeClassValue : id was not defined", xml.attributes.getNamedItem("id").value);
-            var value = seven.Objects.requireNumber("Variable.sizeClassValue : value was not defined", xml.attributes.getNamedItem("value").value);
-            destination.values.put(classId, value);
-        }
-        getProperty(sizeClassId) {
-            if (this.values.containsKey(sizeClassId) == false) {
-                throw new Error("Variable::getProperty : not value for sizeclassid<" + sizeClassId + ">");
-            }
-            return this.values.get(sizeClassId);
-        }
-    }
-    seven.Variable = Variable;
     class ViewUtility {
+        //AutoGeneratedClassName-end - do not eidt this line
         constructor() {
         }
+        getClassName() { return ViewUtility.classname; }
         static randomColor() {
             return '#' + this.hex(this.rg(1, 10)) + this.hex(this.rg(1, 10)) + this.hex(this.rg(1, 15)) +
                 this.hex(this.rg(1, 15)) + this.hex(this.rg(1, 15)) + this.hex(this.rg(1, 15));
@@ -1537,6 +1086,8 @@ seven.ClassLoader.manager().loadInstance(seven.ResizeManager.className);
             return i.toString(16);
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    ViewUtility.classname = "seven.ViewUtility";
     seven.ViewUtility = ViewUtility;
 //{INSERTORDER:2}
     class AbstractViewController extends seven.JBObject {
@@ -1545,6 +1096,7 @@ seven.ClassLoader.manager().loadInstance(seven.ResizeManager.className);
             this.childViewController = new Array();
             this.parentViewController = undefined;
         }
+        getClassName() { return AbstractViewController.classname; }
         addChildViewController(viewController) {
             viewController.setParentViewController(this);
             this.childViewController.push(viewController);
@@ -1575,12 +1127,316 @@ seven.ClassLoader.manager().loadInstance(seven.ResizeManager.className);
             }
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    AbstractViewController.classname = "seven.AbstractViewController";
     seven.AbstractViewController = AbstractViewController;
+//{INSERTORDER:2}
+    class JBDocument extends seven.JBObject {
+        constructor() {
+            super();
+            this.windows = new Array();
+        }
+        getClassName() { return JBDocument.classname; }
+        /**@returns the shared document singleton */
+        static document() {
+            if (JBDocument._instance == undefined) {
+                JBDocument._instance = new JBDocument();
+                JBDocument._instance.documentController = new seven.DocumentController();
+                JBDocument._instance.documentController.view = new seven.DocumentView();
+                JBDocument._instance.doucmentView = JBDocument._instance.documentController.view;
+            }
+            return JBDocument._instance;
+        }
+        /**
+        *
+        * @param resizeManager resizeManager takes controll over resizing #BigSuprise usually u get this for free - your welcome
+        * mostly it is defined in the {Global.ClassLoader} in the global space for the inital loader
+        */
+        setResizeManager(resizeManager) {
+            this.resizeManager = resizeManager;
+        }
+        /**
+        *
+        * @returns resizeManager takes controll over resizing #BigSuprise usually u get this for free - your welcome
+        * mostly it is defined in the {Global.ClassLoader} in the global space for the inital loader
+        */
+        getResizeManager() {
+            return this.resizeManager;
+        }
+        /**
+         *
+         * @param sizeLoader handles the sizing - how many size classes and which one to use,i.e. ipadPortrait
+         */
+        setSizeLoader(sizeLoader) {
+            this.sizeLoader = sizeLoader;
+        }
+        getSizeLoader() {
+            return this.sizeLoader;
+        }
+        /**
+         *
+         * @param windowLoader the window loader is the instance that decides,which windows should be loaded
+         * - this takes can only be handled by you - so provide a implementation to get started
+         * mostly it is defined in the {Global.ClassLoader} in the global space for the inital loader
+         */
+        setWindowLoader(windowLoader) {
+            this.windowLoader = windowLoader;
+        }
+        getWindowLoader() {
+            return this.windowLoader;
+        }
+        hasWindowLoader() {
+            if (this.windowLoader == undefined) {
+                return false;
+            }
+            return true;
+        }
+        setRenderer(renderer) {
+            this.renderer = renderer;
+        }
+        getRenderer() {
+            return this.renderer;
+        }
+        hasRenderer() {
+            if (this.renderer == undefined) {
+                return false;
+            }
+            return true;
+        }
+        prepareLoading() {
+            seven.Objects.requireNonNull("DocumentDelegate.setup() document must not be null", document);
+            seven.Objects.requireNonNull("DocumentDelegate.windowLoader must not be null", this.windowLoader);
+            seven.Objects.requireNonNull("DocumentDelegate.resizeManager must not be null", this.resizeManager);
+            seven.Objects.requireNonNull("DocumentDelegate.sizeLoader must not be null", this.sizeLoader);
+            seven.Objects.requireNonNull("DocumentDelegate.renderer must not be null", this.render);
+            this.windowLoader.setup(this);
+            this.resizeManager.setup(this);
+        }
+        load() {
+            //@TODO - define options better userInfo (iPad,ScreenSize,...)
+            this.sizeLoader.initWithOptions(seven.UserInfo.clientInfo());
+            this.windowLoader.loadWindows(this.sizeLoader.getSizeClass());
+        }
+        startRendering() {
+            this.render();
+            this.resizeManager.startResizing();
+        }
+        /**
+         *
+         *this is needed to change the window loader (switch between pages)
+         */
+        reloadWindows() {
+            JBDocument.document().getWindowLoader().loadWindows(this.sizeLoader.getSizeClass());
+            this.render();
+            this.resizeManager.startResizing();
+        }
+        setDocumentController(documentController) {
+            this.documentController = documentController;
+        }
+        addSubWindow(window) {
+            seven.Objects.requireNonNull("Document : Added window must not be null", window);
+            this.windows.push(window);
+            this.doucmentView.addSubview(window.view);
+            if (window.getController() != undefined) {
+                this.documentController.addChildViewController(window.getController());
+            }
+        }
+        removeSubWindow(window) {
+            for (var index in this.windows) {
+                if (this.windows[index] == window) {
+                    this.windows.splice(parseInt(index), 1);
+                }
+            }
+        }
+        getWindows() {
+            return this.windows;
+        }
+        /**redraw the view - this is mainly to render the changes in the canvas views */
+        render() {
+            this.renderer.renderViewHierachy(this.doucmentView);
+        }
+        /**
+        *                 |
+        *  vetical   =    |
+        *                 |
+        * horizontal = -- -- --
+        *
+        * @argument value : the value in scale with the sizeclass
+        *@returns the value in scale with the screen(actual displayed value)
+        */
+        verticalScreenValue(value, useBaseClass = true) {
+            if (this.getResizeManager() == undefined || this.getResizeManager().hasSizeClass() == false) {
+                return value;
+            }
+            return this.getResizeManager().verticalScreenValue(value, useBaseClass);
+        }
+        /**
+         *                 |
+         *   vetical  =    |
+         *                 |
+         * horizontal = -- -- --
+         *
+        * @argument value : the value in scale with the sizeclass
+        *@returns the value in scale with the screen(actual displayed value)
+        */
+        horizontalScreenValue(value, useBaseClass = true) {
+            if (this.getResizeManager() == undefined || this.getResizeManager().hasSizeClass() == false) {
+                return value;
+            }
+            return this.getResizeManager().horizontalScreenValue(value, useBaseClass);
+        }
+        /**
+         *                 |
+         *   vetical  =    |
+         *                 |
+         * horizontal = -- -- --
+         *
+         * @argument value : the value in scale with the screen(actual displayed value)
+         *@returns the value in scale with the sizeclass
+         */
+        verticalReferenceValue(value, useBaseClass = true) {
+            if (this.getResizeManager() == undefined || this.getResizeManager().hasSizeClass() == false) {
+                return value;
+            }
+            return this.getResizeManager().verticalReferenceValue(value, useBaseClass);
+        }
+        /**
+         *                 |
+         *   vetical  =    |
+         *                 |
+         * horizontal = -- -- --
+         *
+         * @argument value : the value in scale with the screen(actual displayed value)
+         *@returns the value in scale with the sizeclass
+         */
+        horizontalReferenceValue(value, useBaseClass = true) {
+            if (this.getResizeManager() == undefined || this.getResizeManager().hasSizeClass() == false) {
+                return value;
+            }
+            return this.getResizeManager().horizontalReferenceValue(value, useBaseClass);
+        }
+        /*
+            Callbacks from the Drag - Touchinterpreters
+            will find the toppest view witch is dragable
+            and notify its controller, that a dragStart
+            @TODO - Maybe the wrong place for it here
+        */
+        dragStart(orgin) {
+            /*  this.dragView = this.doucmentView.getViewForOrignAndOptions(orgin, (view: View): boolean => {
+                  return view.dragable == true;
+              });
+              if(this.dragView != undefined){
+                  this.dragView = this.dragView.getController().dragStart(orgin, this.dragView);
+              }
+          
+              return this.dragView;*/
+            return undefined;
+        }
+        /*
+            Callbacks from the Drag - Touchinterpreters
+            get the toppest view for the dragging position(finger location)
+            and if a drag has stopped visiting a controllers region(draged over somewhere) --> notify that controller
+            @TODO - Maybe the wrong place for it here
+        */
+        dragMove(orgin) {
+            /* if (this.dragView == undefined) {
+                 Logger.error("JBDocument.dragMove() - dragView should not be undefined here");
+                 return;
+             }
+             var testView = this.doucmentView.getViewForOrignAndOptions(orgin, (view: View): boolean => {
+                 return view.controller != undefined;
+             });
+     
+             if (testView == undefined || testView.getController() == undefined) {
+                 return;
+             }
+             var testViewController: AbstractViewController = testView.getController();
+             if (this.currentDragReciever == undefined) {
+                 this.currentDragReciever = testViewController;
+             }
+             if (testViewController != this.currentDragReciever) {
+                 this.currentDragReciever.dragHasLeft();
+                 this.currentDragReciever = testViewController;
+             }
+     
+             testViewController.dragHasMoved(orgin, this.dragView);*/
+        }
+        /*
+            Callbacks from the Drag - Touchinterpreters
+            get the toppest view for the dragging position(finger location)
+            that view's controller wins and gets to decide what to to with the view
+            @TODO - Maybe the wrong place for it here
+        */
+        dragEnd(orgin) {
+            /* var posiibleViews = new Array<View>();
+             this.doucmentView.getViewsForOrgin(posiibleViews, orgin);
+     
+             for (let view of posiibleViews) {
+                 if (view == undefined || view.getController() == undefined) {
+                     continue;
+                 }
+                 var testViewController: AbstractViewController = view.getController();
+                 if (testViewController.dragHasEnded(orgin, this.dragView)) {
+                     break;
+                 }
+             }
+             //reset them vars
+             this.dragView = undefined;
+             this.currentDragReciever = undefined;*/
+        }
+        /*
+            Callbacks from the Scroll - Touchinterpreters
+            get the toppest view that is scrollable and notify it that a scroll happend
+            @TODO - Maybe the wrong place for it here
+        */
+        scrollMove(orgin, difference) {
+            /* var scrollView = this.doucmentView.getViewForOrignAndOptions(orgin, (view: View): boolean => {
+                 return view.scrollable == true;
+             });
+             if (scrollView == undefined) {
+                 return;
+             }
+             scrollView.scroll(difference);
+             this.render(); */
+        }
+        /*
+            Callbacks from the Click-Gesture Sender
+            get the toppest view that will react to the event
+            @TODO - Maybe the wrong place for it here
+        */
+        tapRecieved(orgin, values) {
+            /* var key = TapGestureCallback.keyOf(values);
+             var gestureReciever = this.doucmentView.getViewForOrignAndOptions(orgin, (view: View): boolean => {
+                 return view.hasGestureType(key);
+             });
+             if (gestureReciever != undefined) {
+                 gestureReciever.fireGesture(key, values);
+             }*/
+        }
+        /*
+                Callbacks from the Click-Gesture Sender
+                get the toppest view that will react to the event
+                @TODO - Maybe the wrong place for it here
+            */
+        clickRecieved(orgin, values) {
+            /* var key = ClickGestureCallback.keyOf(values);
+             var gestureReciever = this.doucmentView.getViewForOrignAndOptions(orgin, (view: View): boolean => {
+                 return view.hasGestureType(key);
+             });
+             if (gestureReciever != undefined) {
+                 gestureReciever.fireGesture(key, values);
+             }*/
+        }
+    }
+    //AutoGeneratedClassName-start - do not eidt this line
+    JBDocument.classname = "seven.JBDocument";
+    seven.JBDocument = JBDocument;
 //{INSERTORDER:2}
     class GestureCallback extends seven.JBObject {
         constructor() {
             super();
         }
+        getClassName() { return GestureCallback.classname; }
         initWithMethod(thisRef, method) {
             this.thisRef = thisRef;
             this.method = method;
@@ -1606,11 +1462,57 @@ seven.ClassLoader.manager().loadInstance(seven.ResizeManager.className);
             return newObject;
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    GestureCallback.classname = "seven.GestureCallback";
     seven.GestureCallback = GestureCallback;
+//{INSERTORDER:2}
+    class GestureConfiguration extends seven.JBObject {
+        constructor() {
+            super();
+            //AutoGeneratedClassName-end - do not eidt this line
+            // this shows how much the user can move the mouse from mouseDown to mouseUp
+            // to be valid click
+            // it this case it means 10 px
+            this.mouseClickRange = new seven.Rect(-5, -5, 10, 10);
+            // this shows how much the user can move his finger from touchStart till touchEnd
+            // to be valid click
+            // it this case it means 20 px
+            this.screenClickRange = new seven.Rect(-20, -20, 40, 40);
+            // if the next tap happens within this time it gets added to the tapCount
+            // ie. tapCount=1 -> next tap within time -> tapCount=2
+            // else it will be treated as a new tap(tapCount=1)
+            this.tapRetouchTimeout = 300 /* ms*/;
+            // if the mouse/touch is held down too long it is no longer a tap
+            this.tapMaximumTouchDown = 500;
+        }
+        getClassName() { return GestureConfiguration.classname; }
+        getMouseClickRange() {
+            return this.mouseClickRange;
+        }
+        setMouseClickRange(range) {
+            this.mouseClickRange = range;
+        }
+        getScreenClickRange() {
+            return this.screenClickRange;
+        }
+        setScreenClickRange(range) {
+            this.screenClickRange = range;
+        }
+        getTapRetouchTimeout() {
+            return this.tapRetouchTimeout;
+        }
+        getTapMaximumTouchDowm() {
+            return this.tapMaximumTouchDown;
+        }
+    }
+    //AutoGeneratedClassName-start - do not eidt this line
+    GestureConfiguration.classname = "seven.GestureConfiguration";
+    seven.GestureConfiguration = GestureConfiguration;
 //{INSERTORDER:2}
     class JBTouchEvent extends seven.JBObject {
         constructor() {
             super();
+            //AutoGeneratedClassName-end - do not eidt this line
             this.orgin = seven.Orgin.empty();
             this.difference = seven.Orgin.empty();
             this.differenceFromStart = seven.Orgin.empty();
@@ -1618,6 +1520,7 @@ seven.ClassLoader.manager().loadInstance(seven.ResizeManager.className);
             this.elementId = "";
             this.dragging = false;
         }
+        getClassName() { return JBTouchEvent.classname; }
         setOrgin(orgin) {
             this.orgin = orgin;
         }
@@ -1656,6 +1559,8 @@ seven.ClassLoader.manager().loadInstance(seven.ResizeManager.className);
             return newObject;
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    JBTouchEvent.classname = "seven.JBTouchEvent";
     seven.JBTouchEvent = JBTouchEvent;
 //{INSERTORDER:2}
     class JMBMap extends seven.AbstractMap {
@@ -1696,27 +1601,25 @@ seven.ClassLoader.manager().loadInstance(seven.ResizeManager.className);
         constructor() {
             super();
         }
-        initWithID(id) {
-            this.htmlElementId = id;
-            this.htmlElement = document.getElementById(id);
+        getClassName() { return JMBWindow.classname; }
+        init(htmlId, controller = new seven.ViewController()) {
+            this.htmlElementId = htmlId;
+            this.htmlElement = document.getElementById(htmlId);
+            this.controller = controller;
             Object.freeze(this.htmlElement);
+            return this;
         }
         setupTouches() {
         }
-        setController(controller) {
-            this.windowController = controller;
-            controller.setWindow(this);
-            if (this.view != undefined) {
-                this.view.setController(controller);
-            }
-        }
         getController() {
-            return this.windowController;
+            return this.controller;
         }
         hasMovedToWindowController(controller) {
-            this.windowController = controller;
+            this.controller = controller;
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    JMBWindow.classname = "seven.JMBWindow";
     seven.JMBWindow = JMBWindow;
 /** @class Orgin
  *
@@ -1730,6 +1633,7 @@ seven.ClassLoader.manager().loadInstance(seven.ResizeManager.className);
             this.x = x;
             this.y = y;
         }
+        getClassName() { return Orgin.classname; }
         // empty is better that undefined 
         static empty() {
             var resultOrgin = new Orgin(0, 0);
@@ -1819,14 +1723,18 @@ seven.ClassLoader.manager().loadInstance(seven.ResizeManager.className);
             return this;
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    Orgin.classname = "seven.Orgin";
     seven.Orgin = Orgin;
     class ResourceManager extends seven.JBObject {
         constructor() {
             super();
+            //AutoGeneratedClassName-end - do not eidt this line
             this.images = new seven.JMBMap();
             this.callbacks = new seven.JMBMap();
             this.loadImage = undefined;
         }
+        getClassName() { return ResourceManager.classname; }
         static manager() {
             if (ResourceManager._instance == undefined) {
                 ResourceManager._instance = new ResourceManager();
@@ -1875,192 +1783,29 @@ seven.ClassLoader.manager().loadInstance(seven.ResizeManager.className);
             this.loadImage = undefined;
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    ResourceManager.classname = "seven.ResourceManager";
     seven.ResourceManager = ResourceManager;
-//{INSERTORDER:2}
-    class SizeClass extends seven.JBObject {
-        constructor(id, width, height, description) {
-            super();
-            this.description = "<>";
-            this.id = id;
-            this.width = width;
-            this.height = height;
-            this.description = description;
-        }
-        static fromXML(xml) {
-            var width = seven.Objects.requireNumber("SizeClass.fromXML : width was not defined/not a number", xml.attributes.getNamedItem("width").value);
-            var height = seven.Objects.requireNumber("SizeClass.fromXML : hieght was not defined/not a number", xml.attributes.getNamedItem("height").value);
-            var id = seven.Objects.requireNonNull("SizeClass.fromXML : id was not defined", xml.attributes.getNamedItem("id").value);
-            var description = seven.Objects.orElse(xml.attributes.getNamedItem("description").value, "");
-            return new SizeClass(id, width, height, description);
-        }
-        getId() {
-            return this.id;
-        }
-        setWidth(width) {
-            this.width = width;
-        }
-        getWidth() {
-            return this.width;
-        }
-        setHeight(height) {
-            this.height = height;
-        }
-        getHeight() {
-            return this.height;
-        }
-        asRect() {
-            return new seven.Rect(this.width, this.height, this.width, this.height);
-        }
-        getDescription() {
-            return this.description;
-        }
-        setDescription(description) {
-            this.description = description;
-        }
-        //@Override JBObject
-        copyAttributes(toObject) {
-            toObject.width = this.width;
-            toObject.height = this.height;
-            toObject.description = this.description;
-        }
-        //@Override JBObject
-        copy() {
-            var newSizeClass = new SizeClass(this.id, this.width, this.height);
-            this.copyAttributes(newSizeClass);
-            return newSizeClass;
-        }
-    }
-    seven.SizeClass = SizeClass;
 //{INSERTORDER:2}
     class TouchIntepreter extends seven.JBObject {
         constructor() {
             super();
         }
+        getClassName() { return TouchIntepreter.classname; }
         setDelegate(delegate) {
             this.delegate = delegate;
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    TouchIntepreter.classname = "seven.TouchIntepreter";
     seven.TouchIntepreter = TouchIntepreter;
-//{INSERTORDER:2}
-    class TouchInterpreterConfiguration extends seven.JBObject {
-        constructor() {
-            super();
-        }
-    }
-    seven.TouchInterpreterConfiguration = TouchInterpreterConfiguration;
-//{INSERTORDER:4}
-    class TouchManager extends seven.JBObject {
-        constructor() {
-            super();
-            //reciever
-            this.recievers = new Array();
-        }
-        static manager() {
-            if (TouchManager._instance == undefined) {
-                TouchManager._instance = new TouchManager();
-                TouchManager._instance.senderConfiguration = new seven.TouchSenderConfiguration();
-                TouchManager._instance.interpreterConfiguration = new seven.TouchInterpreterConfiguration();
-                TouchManager._instance.gestureConfiguration = new seven.GestureConfiguration();
-            }
-            return TouchManager._instance;
-        }
-        /**
-         * This gives the instance, which was loaded by the Classloader
-         * You can use this to access this instance afterwoulds-or don't, you decide
-        */
-        static loadedInstance() {
-            return TouchManager.manager();
-        }
-        getClassName() {
-            return "TouchEvents.TouchManager";
-        }
-        // sender 
-        get keyboardSender() {
-            return this._keyboardSender;
-        }
-        set keyboardSender(sender) {
-            this._keyboardSender = sender;
-            sender.touchReciever = this;
-            sender.setConfiguration(this.senderConfiguration);
-            sender.addEventReciever(this.scrollIntepreter);
-        }
-        get mouseSender() {
-            return this._mouseSender;
-        }
-        set mouseSender(sender) {
-            this._mouseSender = sender;
-            sender.touchReciever = this;
-            sender.setConfiguration(this.senderConfiguration);
-            sender.addEventReciever(this.dragIntepreter);
-            sender.addEventReciever(this.tapGesture);
-            sender.addEventReciever(this.scrollIntepreter);
-        }
-        get screenSender() {
-            return this._screenSender;
-        }
-        set screenSender(sender) {
-            this._screenSender = sender;
-            sender.touchReciever = this;
-            sender.setConfiguration(this.senderConfiguration);
-            sender.addEventReciever(this.dragIntepreter);
-            sender.addEventReciever(this.tapGesture);
-            sender.addEventReciever(this.scrollIntepreter);
-        }
-        //interpreter
-        get dragIntepreter() {
-            return this._dragIntepreter;
-        }
-        set dragIntepreter(intepreter) {
-            this._dragIntepreter = intepreter;
-        }
-        get scrollIntepreter() {
-            return this._scrollInterpreter;
-        }
-        set scrollIntepreter(intepreter) {
-            this._scrollInterpreter = intepreter;
-        }
-        //gesture
-        get tapGesture() {
-            return this._tapGesture;
-        }
-        set tapGesture(value) {
-            this._tapGesture = value;
-            this._tapGesture.setConfiguration(this.gestureConfiguration);
-        }
-        //reciever
-        addTouchReciever(touchReciever) {
-            this.recievers.push(touchReciever);
-        }
-        touchBegan(touchEvent) {
-            for (let reciever of this.recievers) {
-                reciever.touchBegan(touchEvent);
-            }
-        }
-        touchMoved(touchEvent) {
-            for (let reciever of this.recievers) {
-                reciever.touchMoved(touchEvent);
-            }
-        }
-        touchEnded(touchEvent) {
-            for (let reciever of this.recievers) {
-                reciever.touchEnded(touchEvent);
-            }
-        }
-        touchCanceled(touchEvent) {
-            for (let reciever of this.recievers) {
-                reciever.touchCanceled(touchEvent);
-            }
-        }
-    }
-    TouchManager.className = "seven.TouchManager";
-    seven.TouchManager = TouchManager;
-seven.ClassLoader.manager().loadInstance(seven.TouchManager.className);
 //{INSERTORDER:3}
     class TouchSender extends seven.JBObject {
         constructor() {
             super();
             this.eventReciever = new seven.JMBMap();
         }
+        getClassName() { return TouchSender.classname; }
         setConfiguration(configuration) {
             this.configuration = configuration;
         }
@@ -2079,46 +1824,22 @@ seven.ClassLoader.manager().loadInstance(seven.TouchManager.className);
             return { "x": "0", "y": "0" };
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    TouchSender.classname = "seven.TouchSender";
     seven.TouchSender = TouchSender;
 //{INSERTORDER:2}
-    class TouchSenderConfiguration extends seven.JBObject {
-        constructor() {
-            super();
-            this.keyHoldMove = 400;
-            this.screenLongPressTime = 300;
-            this.mouseLongPressTime = 100;
-        }
-        getKeyHoldMove() {
-            return this.keyHoldMove;
-        }
-        setKeyHoldMove(value) {
-            this.keyHoldMove = value;
-        }
-        setScreenLongPressTime(longPressTime) {
-            this.screenLongPressTime = longPressTime;
-        }
-        getScreenLongPressTime() {
-            return this.screenLongPressTime;
-        }
-        setMouseLongPressTime(longPressTime) {
-            this.mouseLongPressTime = longPressTime;
-        }
-        getMouseLongPressTime() {
-            return this.mouseLongPressTime;
-        }
-    }
-    seven.TouchSenderConfiguration = TouchSenderConfiguration;
-//{INSERTORDER:2}
     class View extends seven.JBObject {
+        //  protected viewExtentions: Array<IViewDrawable> = new Array<IViewDrawable>();
         constructor() {
             super();
             this.frame = seven.Rect.empty();
             this.bounds = seven.Rect.empty();
             this.viewId = "";
             this.gestureActions = new seven.JMBMap();
-            this.viewExtentions = new Array();
+            this.style = new seven.DefaultStyleProvider();
             this.subViews = new Array();
         }
+        getClassName() { return View.classname; }
         /**
          * @param frame the frame which the view should get
          */
@@ -2146,14 +1867,6 @@ seven.ClassLoader.manager().loadInstance(seven.TouchManager.className);
                 }
             }
         }
-        getWindow() {
-            if (this.window) {
-                return this.window;
-            }
-            if (this.superView) {
-                return this.superView.getWindow();
-            }
-        }
         addSubview(view) {
             if (view.superView != undefined) {
                 view.superView.removeSubView(view);
@@ -2161,15 +1874,18 @@ seven.ClassLoader.manager().loadInstance(seven.TouchManager.className);
             this.subViews.push(view);
             view.setSuperView(this);
         }
+        setStyleProvider(styleProvider) {
+            this.style = styleProvider;
+        }
         setSuperView(view) {
             this.superView = view;
         }
         //@override
-        draw(orgin) { }
-        drawSubViews(orgin) {
-            var subViewOrgin = seven.Orgin.copyOrgin(orgin);
+        drawInRect(rect) { }
+        drawSubViews(rect) {
+            var subViewRect = seven.Rect.copyRect(rect);
             this.subViews.forEach(element => {
-                element.draw(subViewOrgin);
+                element.drawSubViews(subViewRect);
             });
         }
         addGestureCallback(callback) {
@@ -2210,7 +1926,6 @@ seven.ClassLoader.manager().loadInstance(seven.TouchManager.className);
             for (let gesture of this.gestureActions.values()) {
                 toObject.gestureActions.put(gesture.getKey(), gesture.copy());
             }
-            toObject.window = this.window;
             toObject.tag = this.tag;
         }
         //@Override - JBObject 
@@ -2221,568 +1936,166 @@ seven.ClassLoader.manager().loadInstance(seven.TouchManager.className);
             seven.Logger.develepor("view - scrol() called and not taken");
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    View.classname = "seven.View";
     seven.View = View;
 //{INSERTORDER:3}
-    class CanvasWindow extends seven.JMBWindow {
-        constructor() {
-            super();
-        }
-        //@override
-        initWithCanvasID(canvasID) {
-            super.initWithID(canvasID);
-            this.setUpView();
-            return this;
-        }
-        setUpView() {
-            this.view = new seven.HtmlCanvasView(this.htmlElementId);
-            this.view.window = this;
-        }
-        remove() {
-            this.view.remove();
-        }
-    }
-    seven.CanvasWindow = CanvasWindow;
-//{INSERTORDER:2}
-    class JBDocument extends seven.JBObject {
-        constructor() {
-            super();
-            this.windows = new Array();
-        }
-        /**@returns the shared document singleton */
-        static document() {
-            if (JBDocument._instance == undefined) {
-                JBDocument._instance = new JBDocument();
-                JBDocument._instance.doucmentView = new seven.DocumentView();
-                JBDocument._instance.documentController = new seven.DocumentController();
-                JBDocument._instance.doucmentView.setController(JBDocument._instance.documentController);
-            }
-            return JBDocument._instance;
-        }
-        /**
-        *
-        * @param resizeManager resizeManager takes controll over resizing #BigSuprise usually u get this for free - your welcome
-        * mostly it is defined in the {Global.ClassLoader} in the global space for the inital loader
-        */
-        setResizeManager(resizeManager) {
-            this.resizeManager = resizeManager;
-        }
-        /**
-        *
-        * @returns resizeManager takes controll over resizing #BigSuprise usually u get this for free - your welcome
-        * mostly it is defined in the {Global.ClassLoader} in the global space for the inital loader
-        */
-        getResizeManager() {
-            return this.resizeManager;
-        }
-        /**
-         *
-         * @param sizeLoader handles the sizing - how many size classes and which one to use,i.e. ipadPortrait
-         */
-        setSizeLoader(sizeLoader) {
-            this.sizeLoader = sizeLoader;
-        }
-        getSizeLoader() {
-            return this.sizeLoader;
-        }
-        /**
-         *
-         * @param windowLoader the window loader is the instance that decides,which windows should be loaded
-         * - this takes can only be handled by you - so provide a implementation to get started
-         * mostly it is defined in the {Global.ClassLoader} in the global space for the inital loader
-         */
-        setWindowLoader(windowLoader) {
-            this.windowLoader = windowLoader;
-        }
-        getWindowLoader() {
-            return this.windowLoader;
-        }
-        hasWindowLoader() {
-            if (this.windowLoader == undefined) {
-                return false;
-            }
-            return true;
-        }
-        prepareLoading() {
-            seven.Objects.requireNonNull("DocumentDelegate.setup() document must not be null", document);
-            seven.Objects.requireNonNull("DocumentDelegate.windowLoader must not be null", JBDocument.document().getWindowLoader());
-            seven.Objects.requireNonNull("DocumentDelegate.resizeManager must not be null", this.resizeManager);
-            seven.Objects.requireNonNull("DocumentDelegate.sizeLoader must not be null", this.sizeLoader);
-            this.windowLoader.setup(this);
-            this.resizeManager.setup(this);
-        }
-        load() {
-            //@TODO - define options better userInfo (iPad,ScreenSize,...)
-            this.sizeLoader.initWithOptions(seven.UserInfo.clientInfo());
-            this.windowLoader.loadWindows(this.sizeLoader.getSizeClass());
-        }
-        startRendering() {
-            this.render();
-            this.resizeManager.startResizing();
-        }
-        /**
-         *
-         *this is needed to change the window loader (switch between pages)
-         */
-        reloadWindows() {
-            JBDocument.document().getWindowLoader().loadWindows(this.sizeLoader.getSizeClass());
-            this.render();
-            this.resizeManager.startResizing();
-        }
-        setDocumentController(documentController) {
-            this.documentController = documentController;
-        }
-        addSubWindow(window) {
-            seven.Objects.requireNonNull("Document : Added window must not be null", window);
-            this.windows.push(window);
-            this.doucmentView.addSubview(window.view);
-            if (window.getController() != undefined) {
-                this.documentController.addChildViewController(window.getController());
-            }
-        }
-        removeSubWindow(window) {
-            for (var index in this.windows) {
-                if (this.windows[index] == window) {
-                    this.windows.splice(parseInt(index), 1);
-                }
-            }
-        }
-        getWindows() {
-            return this.windows;
-        }
-        /**redraw the view - this is mainly to render the changes in the canvas views */
-        render() {
-            for (let subView of this.doucmentView.subViews) {
-                subView.resetReferenceFrame();
-            }
-            for (let subView of this.doucmentView.subViews) {
-                subView.buildConstraints();
-            }
-            for (let subView of this.doucmentView.subViews) {
-                subView.buildAppliadFrame();
-            }
-            for (let subView of this.doucmentView.subViews) {
-                subView.draw(new seven.Orgin(0, 0));
-            }
-        }
-        /**
-        *                 |
-        *  vetical   =    |
-        *                 |
-        * horizontal = -- -- --
-        *
-        * @argument value : the value in scale with the sizeclass
-        *@returns the value in scale with the screen(actual displayed value)
-        */
-        verticalScreenValue(value, useBaseClass = true) {
-            if (this.getResizeManager() == undefined || this.getResizeManager().hasSizeClass() == false) {
-                return value;
-            }
-            return this.getResizeManager().verticalScreenValue(value, useBaseClass);
-        }
-        /**
-         *                 |
-         *   vetical  =    |
-         *                 |
-         * horizontal = -- -- --
-         *
-        * @argument value : the value in scale with the sizeclass
-        *@returns the value in scale with the screen(actual displayed value)
-        */
-        horizontalScreenValue(value, useBaseClass = true) {
-            if (this.getResizeManager() == undefined || this.getResizeManager().hasSizeClass() == false) {
-                return value;
-            }
-            return this.getResizeManager().horizontalScreenValue(value, useBaseClass);
-        }
-        /**
-         *                 |
-         *   vetical  =    |
-         *                 |
-         * horizontal = -- -- --
-         *
-         * @argument value : the value in scale with the screen(actual displayed value)
-         *@returns the value in scale with the sizeclass
-         */
-        verticalReferenceValue(value, useBaseClass = true) {
-            if (this.getResizeManager() == undefined || this.getResizeManager().hasSizeClass() == false) {
-                return value;
-            }
-            return this.getResizeManager().verticalReferenceValue(value, useBaseClass);
-        }
-        /**
-         *                 |
-         *   vetical  =    |
-         *                 |
-         * horizontal = -- -- --
-         *
-         * @argument value : the value in scale with the screen(actual displayed value)
-         *@returns the value in scale with the sizeclass
-         */
-        horizontalReferenceValue(value, useBaseClass = true) {
-            if (this.getResizeManager() == undefined || this.getResizeManager().hasSizeClass() == false) {
-                return value;
-            }
-            return this.getResizeManager().horizontalReferenceValue(value, useBaseClass);
-        }
-        /*
-            Callbacks from the Drag - Touchinterpreters
-            will find the toppest view witch is dragable
-            and notify its controller, that a dragStart
-            @TODO - Maybe the wrong place for it here
-        */
-        dragStart(orgin) {
-            this.dragView = this.doucmentView.getViewForOrignAndOptions(orgin, (view) => {
-                return view.dragable == true;
-            });
-            if (this.dragView != undefined) {
-                this.dragView = this.dragView.getController().dragStart(orgin, this.dragView);
-            }
-            return this.dragView;
-        }
-        /*
-            Callbacks from the Drag - Touchinterpreters
-            get the toppest view for the dragging position(finger location)
-            and if a drag has stopped visiting a controllers region(draged over somewhere) --> notify that controller
-            @TODO - Maybe the wrong place for it here
-        */
-        dragMove(orgin) {
-            if (this.dragView == undefined) {
-                seven.Logger.error("JBDocument.dragMove() - dragView should not be undefined here");
-                return;
-            }
-            var testView = this.doucmentView.getViewForOrignAndOptions(orgin, (view) => {
-                return view.controller != undefined;
-            });
-            if (testView == undefined || testView.getController() == undefined) {
-                return;
-            }
-            var testViewController = testView.getController();
-            if (this.currentDragReciever == undefined) {
-                this.currentDragReciever = testViewController;
-            }
-            if (testViewController != this.currentDragReciever) {
-                this.currentDragReciever.dragHasLeft();
-                this.currentDragReciever = testViewController;
-            }
-            testViewController.dragHasMoved(orgin, this.dragView);
-        }
-        /*
-            Callbacks from the Drag - Touchinterpreters
-            get the toppest view for the dragging position(finger location)
-            that view's controller wins and gets to decide what to to with the view
-            @TODO - Maybe the wrong place for it here
-        */
-        dragEnd(orgin) {
-            var posiibleViews = new Array();
-            this.doucmentView.getViewsForOrgin(posiibleViews, orgin);
-            for (let view of posiibleViews) {
-                if (view == undefined || view.getController() == undefined) {
-                    continue;
-                }
-                var testViewController = view.getController();
-                if (testViewController.dragHasEnded(orgin, this.dragView)) {
-                    break;
-                }
-            }
-            //reset them vars
-            this.dragView = undefined;
-            this.currentDragReciever = undefined;
-        }
-        /*
-            Callbacks from the Scroll - Touchinterpreters
-            get the toppest view that is scrollable and notify it that a scroll happend
-            @TODO - Maybe the wrong place for it here
-        */
-        scrollMove(orgin, difference) {
-            var scrollView = this.doucmentView.getViewForOrignAndOptions(orgin, (view) => {
-                return view.scrollable == true;
-            });
-            if (scrollView == undefined) {
-                return;
-            }
-            scrollView.scroll(difference);
-            this.render();
-        }
-        /*
-            Callbacks from the Click-Gesture Sender
-            get the toppest view that will react to the event
-            @TODO - Maybe the wrong place for it here
-        */
-        tapRecieved(orgin, values) {
-            var key = seven.TapGestureCallback.keyOf(values);
-            var gestureReciever = this.doucmentView.getViewForOrignAndOptions(orgin, (view) => {
-                return view.hasGestureType(key);
-            });
-            if (gestureReciever != undefined) {
-                gestureReciever.fireGesture(key, values);
-            }
-        }
-        /*
-                Callbacks from the Click-Gesture Sender
-                get the toppest view that will react to the event
-                @TODO - Maybe the wrong place for it here
-            */
-        clickRecieved(orgin, values) {
-            var key = seven.ClickGestureCallback.keyOf(values);
-            var gestureReciever = this.doucmentView.getViewForOrignAndOptions(orgin, (view) => {
-                return view.hasGestureType(key);
-            });
-            if (gestureReciever != undefined) {
-                gestureReciever.fireGesture(key, values);
-            }
-        }
-    }
-    seven.JBDocument = JBDocument;
-//{INSERTORDER:3}
-    class DragTouchInterpreter extends seven.TouchIntepreter {
-        constructor() {
-            super();
-            this.touchOffset = seven.Orgin.empty();
-            this.layoutView = new Array();
-            this.setDelegate(seven.JBDocument.document());
-        }
-        /**
-         * This gives the instance, which was loaded by the Classloader
-         * You can use this to access this instance afterwoulds-or don't, you decide
-        */
-        static loadedInstance() {
-            var loadedInstance = seven.ClassLoader.manager().getLoadedInstance(DragTouchInterpreter.className);
-            if (loadedInstance != undefined) {
-                return loadedInstance;
-            }
-            var dragIntepreter = new DragTouchInterpreter();
-            seven.TouchManager.manager().dragIntepreter = dragIntepreter;
-            return dragIntepreter;
-        }
-        setDelegate(delegate) {
-            this.delegate = delegate;
-        }
-        mousedown(event, touchEvent) {
-        }
-        mouseup(event, touchEvent) {
-            if (this.htmlContainer == undefined) {
-                return;
-            }
-            this.delegate.dragEnd(touchEvent.getOrgin());
-            this.sourceView.hidden = false;
-            this.sourceView.mark = "";
-            // this.sourceView.appliadFrame = Rect.copyRect(this.dragView.appliadFrame);
-            //   this.sourceView.superView.addSubview(this.sourceView);
-            this.htmlContainer.remove();
-            this.htmlContainer = undefined;
-            this.dragView = undefined;
-            seven.JBDocument.document().render();
-        }
-        mousemove(event, touchEvent) {
-            this.delegateTouchEvent = touchEvent;
-            //console.info(touchEvent.getDifference().toString());
-            this.checkDrag();
-            if (this.htmlContainer != undefined) {
-                var x = seven.JBDocument.document().getResizeManager().horizontalReferenceValue(touchEvent.getOrgin().x, true);
-                var y = seven.JBDocument.document().getResizeManager().verticalReferenceValue(touchEvent.getOrgin().y, true);
-                this.htmlContainer.initialReferenceFrame.setX(x - this.touchOffset.x);
-                this.htmlContainer.initialReferenceFrame.setY(y - this.touchOffset.y);
-                seven.JBDocument.document().render();
-                this.delegate.dragMove(touchEvent.getOrgin());
-                for (let view of this.layoutView) {
-                    view.layoutForDrag(new seven.Orgin(x, y));
-                }
-            }
-        }
-        mouseout(event, touchEvent) {
-            if (event.srcElement != event.target) {
-                return;
-            }
-            seven.JBDocument.document().render();
-            if (this.htmlContainer != undefined) {
-                this.delegate.dragEnd(touchEvent.getOrgin());
-            }
-        }
-        touchstart(event, touchEvent) {
-            this.delegateTouchEvent = touchEvent;
-            seven.TouchManager.manager().screenSender.addLongPressCallback(new seven.VoidCallback(this, this.screenLongPressDected));
-        }
-        touchmove(event, touchEvent) {
-            this.delegateTouchEvent = touchEvent;
-            //console.info(touchEvent.getDifference().toString());
-            this.checkDrag();
-            if (this.htmlContainer != undefined) {
-                var x = seven.JBDocument.document().getResizeManager().horizontalReferenceValue(touchEvent.getOrgin().x, true);
-                var y = seven.JBDocument.document().getResizeManager().verticalReferenceValue(touchEvent.getOrgin().y, true);
-                this.htmlContainer.initialReferenceFrame.setX(x - this.touchOffset.x);
-                this.htmlContainer.initialReferenceFrame.setY(y - this.touchOffset.y);
-                seven.JBDocument.document().render();
-                this.delegate.dragMove(touchEvent.getOrgin());
-                for (let view of this.layoutView) {
-                    view.layoutForDrag(new seven.Orgin(x, y));
-                }
-                seven.JBNotificationCenter.touchEventManager().postNotificationForName("dragStart", undefined);
-            }
-        }
-        touchend(event, touchEvent) {
-            this.delegateTouchEvent = touchEvent;
-            if (this.htmlContainer == undefined) {
-                return;
-            }
-            seven.JBNotificationCenter.touchEventManager().postNotificationForName("dragEnd", undefined);
-            this.delegate.dragEnd(touchEvent.getOrgin());
-            this.sourceView.hidden = false;
-            this.sourceView.mark = "";
-            this.htmlContainer.remove();
-            this.htmlContainer = undefined;
-            this.dragView = undefined;
-            seven.JBDocument.document().render();
-        }
-        touchcancel(event, touchEvent) {
-            seven.JBNotificationCenter.touchEventManager().postNotificationForName("dragEnd", undefined);
-        }
-        longPressDetected() {
-            this.delegateTouchEvent.setDragging(true);
-            this.checkDrag();
-        }
-        screenLongPressDected() {
-            this.delegateTouchEvent.setDragging(true);
-            this.screenCheckDrag();
-            this.checkDrag();
-        }
-        screenCheckDrag() {
-            if (this.delegateTouchEvent.isDragging() == true && this.htmlContainer == undefined) {
-                seven.JBNotificationCenter.touchEventManager().postNotificationForName("dragStart", undefined);
-            }
-        }
-        checkDrag() {
-            if (this.delegateTouchEvent.isDragging() == true && this.htmlContainer == undefined) {
-                this.sourceView = this.delegate.dragStart(this.delegateTouchEvent.getOrgin());
-                if (this.sourceView == undefined) {
-                    return;
-                }
-                this.sourceView.mark = "dragView";
-                this.buildTouchOffset(this.sourceView);
-                this.prepareDragView();
-                this.prepareHtmlContainer();
-                seven.JBDocument.document().doucmentView.addSubview(this.htmlContainer);
-                this.htmlContainer.addSubview(this.dragView);
-                seven.JBDocument.document().render();
-            }
-        }
-        prepareDragView() {
-            this.dragView = this.sourceView.copy();
-            this.dragView.subViews = new Array();
-            this.sourceView.hidden = true;
-            this.dragView.referenceFrame.setX(0);
-            this.dragView.referenceFrame.setY(0);
-            this.sourceView.copyAllSubViews(this.dragView);
-        }
-        prepareHtmlContainer() {
-            this.htmlContainer = this.dragView.createHtmlContainer("dragTouch");
-            this.htmlContainer.zIndex = 20;
-            var totalOffset = this.dragView.referenceOffset();
-            this.htmlContainer.referenceFrame = seven.Rect.copyRect(this.dragView.referenceFrame);
-            this.htmlContainer.referenceFrame.setX(totalOffset.x);
-            this.htmlContainer.referenceFrame.setY(totalOffset.y);
-            this.htmlContainer.initWithReferenceFrame(this.htmlContainer.referenceFrame);
-            var con = this.htmlContainer;
-            con.canvas.style.backgroundColor = "transparent";
-        }
-        buildTouchOffset(toView) {
-            var viewOrgin = toView.screenOffset();
-            var touchOrgin = this.delegateTouchEvent.getOrgin();
-            touchOrgin.removeOrgin(viewOrgin);
-            var x = seven.JBDocument.document().getResizeManager().horizontalReferenceValue(touchOrgin.x, true);
-            var y = seven.JBDocument.document().getResizeManager().verticalReferenceValue(touchOrgin.y, true);
-            this.touchOffset = new seven.Orgin(x, y);
-        }
-        addLayoutView(layoutView) {
-            for (let view of this.layoutView) {
-                if (view == layoutView) {
-                    return;
-                }
-            }
-            this.layoutView.push(layoutView);
-        }
-        emptyLayoutView() {
-            this.layoutView = new Array();
-        }
-    }
-    DragTouchInterpreter.className = "seven.DragTouchInterpreter";
-    seven.DragTouchInterpreter = DragTouchInterpreter;
-seven.ClassLoader.manager().loadInstance(seven.DragTouchInterpreter.className);
-//{INSERTORDER:3}
 /**
- * a wrapper for a div - htmlelement
+ * A canvasView represents no html element
+ * all canvasViews get drawn on a containing html-canvas
+ * whens its time to render it gets the htmlCanvas from the containing HtmlCanvas
  *
 */
-    class HtmlElementView extends seven.View {
-        constructor(elementId) {
-            super();
-            if (elementId == undefined) {
-                return;
-            }
-            this.elementId = elementId;
-            this.element = document.getElementById(elementId);
-            if (this.element) {
-                seven.Logger.error("Element already exists for Id : " + this.elementId);
-                return;
-            }
-            this.element = document.createElement("div");
-            this.backgroundColor = seven.ViewUtility.randomColor();
-            this.element.id = elementId;
-            this.element.style.position = "fixed";
-            this.element.style.display = "none";
-            document.body.appendChild(this.element);
-        }
-        setSuperView(view) {
-            super.setSuperView(view);
-            this.element.style.display = "inline";
-        }
-        remove() {
-            this.element.style.display = "none";
-        }
-        draw(orgin) {
-            var drawRect = seven.Rect.copyRect(this.appliadFrame);
-            drawRect.setX(drawRect.x() + orgin.x);
-            drawRect.setY(drawRect.y() + orgin.y);
-            this.element.style.left = "" + drawRect.x() + "px";
-            this.element.style.top = "" + drawRect.y() + "px";
-            this.element.style.backgroundColor = seven.ViewUtility.randomColor();
-            this.element.style.width = this.appliadFrame.width() + "px";
-            this.element.style.height = this.appliadFrame.height() + "px";
-            this.element.style.zIndex = "" + this.getZIndex();
-            this.drawSubViews(new seven.Orgin(0, 0));
-        }
-    }
-    seven.HtmlElementView = HtmlElementView;
-//{INSERTORDER:3}
-/**
- * the view for a window
- */
-    class HtmlWindowView extends seven.View {
+    class CanvasView extends seven.View {
         constructor() {
             super();
-            this.htmlWindow = window;
-            this.initWithReferenceFrame(new seven.Rect(0, 0, this.htmlWindow.innerWidth, this.htmlWindow.innerHeight));
+        }
+        getClassName() { return CanvasView.classname; }
+        initWitFrame(frame) {
+            super.initWitFrame(frame);
+            return this;
+        }
+        /**
+         *
+         * @param id an html id
+         * @param opacity the opacity with wich the container should be inited
+         */
+        createHtmlContainer(id, opacity) {
+            var canvasContainer = document.createElement("CANVAS");
+            canvasContainer.id = id;
+            canvasContainer.style.zIndex = "10";
+            canvasContainer.style.position = "fixed";
+            canvasContainer.style.opacity = opacity != undefined ? opacity : "0.8";
+            document.body.appendChild(canvasContainer);
+            var htmlCanavsView = new seven.HtmlCanvasView(id);
+            return htmlCanavsView;
+        }
+        // returns the context of the HtmlCanvas
+        getContext() {
+            if (this.context) {
+                return this.context;
+            }
+            if (this.superView) {
+                return this.superView.getContext();
+            }
+        }
+        /**
+         * adds an extention to the view(border)
+         * @param extention a valid extention
+         
+        addViewExtention(extention:ICanvasDrawable) {
+            this.viewExtentions.push(extention);
+        }
+        */
+        //@override
+        drawInRect(rect) {
+            if (this.style.isHidden() == true) {
+                return;
+            }
+            if (rect.x() < 0) {
+                var diff = rect.x();
+                rect.setX(rect.x() - diff);
+                rect.setWidth(rect.width() + diff);
+            }
+            if (rect.y() < 0) {
+                var diff = rect.y();
+                rect.setY(rect.y() - diff);
+                rect.setHeight(rect.height() + diff);
+            }
+            if (this.style.getBackGroundColor() == undefined) {
+                this.style.setBackgroundColor("white"); //ViewUtility.randomColor();
+            }
+            if (this.style.getStrokeColor()) {
+                this.getContext().strokeStyle = "" + this.style.getStrokeColor();
+                this.getContext().strokeRect(rect.x(), rect.y(), rect.width(), rect.height());
+            }
+            this.drawBackground(rect);
+            this.drawInRect(rect);
+            this.drawSubViews(rect);
+            this.drawViewExtentions(rect);
+            this.drawDebug();
+        }
+        drawBackground(drawRect) {
+            this.getContext().fillStyle = "" + this.style.getBackGroundColor();
+            this.getContext().fillRect(drawRect.x(), drawRect.y(), drawRect.width(), drawRect.height());
+            this.getContext().fillStyle = "black";
+        }
+        drawViewExtentions(rect) {
+            /*  for (let extention of this.viewExtentions) {
+                  extention.drawInContext(this.getContext(), rect);
+              }
+              if (this.additionalDrawing) {
+                  this.additionalDrawing.call(this, this.getContext(), rect);
+              }*/
+            // this.getContext().fillText(rect.toString(),rect.x(),rect.y()+10);
+        }
+        drawDebug() {
+            //  this.getContext().fillText(rect.toString(),rect.x(),rect.y()+10);
+        }
+        //@Override View
+        copyAttributes(toObject) {
+            super.copyAttributes(toObject);
+            toObject.superView = this.superView;
+            toObject.context = this.context;
+        }
+        //@Override - View 
+        copy() {
+            var newPrototypeTableCell = new CanvasView();
+            this.copyAttributes(newPrototypeTableCell);
+            return newPrototypeTableCell;
+        }
+    }
+    //AutoGeneratedClassName-start - do not eidt this line
+    CanvasView.classname = "seven.CanvasView";
+    seven.CanvasView = CanvasView;
+//{INSERTORDER:3}
+    class DocumentController extends seven.AbstractViewController {
+        constructor() {
+            super();
+        }
+        getClassName() { return DocumentController.classname; }
+    }
+    //AutoGeneratedClassName-start - do not eidt this line
+    DocumentController.classname = "seven.DocumentController";
+    seven.DocumentController = DocumentController;
+//{INSERTORDER:3}
+/**
+ * the view of the JBDocument
+ * all windowViews are attached to here
+*/
+    class DocumentView extends seven.View {
+        //AutoGeneratedClassName-end - do not eidt this line
+        constructor() {
+            super();
+        }
+        getClassName() { return DocumentView.classname; }
+        get rect() {
+            return this.frame;
+        }
+        getZIndex() {
+            return 0;
         }
         //@override
         draw() {
             throw new Error("this view cannot be drawn. this should only be used for sizing the subviews");
         }
     }
-    seven.HtmlWindowView = HtmlWindowView;
+    //AutoGeneratedClassName-start - do not eidt this line
+    DocumentView.classname = "seven.DocumentView";
+    seven.DocumentView = DocumentView;
 //{INSERTORDER:4}
     class KeyboardSender extends seven.TouchSender {
         constructor() {
             super(...arguments);
             this.acceleration = 1.0;
         }
-        getClassName() {
-            return KeyboardSender.className;
-        }
+        getClassName() { return KeyboardSender.classname; }
         /**
          * This gives the instance, which was loaded by the Classloader
          * You can use this to access this instance afterwoulds-or don't, you decide
         */
         static loadedInstance() {
-            var loadedInstance = seven.ClassLoader.manager().getLoadedInstance(KeyboardSender.className);
+            var loadedInstance = seven.ClassLoader.manager().getLoadedInstance(KeyboardSender.classname);
             if (loadedInstance != undefined) {
                 return loadedInstance;
             }
@@ -2865,9 +2178,9 @@ seven.ClassLoader.manager().loadInstance(seven.DragTouchInterpreter.className);
             return undefined;
         }
     }
-    KeyboardSender.className = "seven.KeyboardSender";
+    //AutoGeneratedClassName-start - do not eidt this line
+    KeyboardSender.classname = "seven.KeyboardSender";
     seven.KeyboardSender = KeyboardSender;
-seven.ClassLoader.manager().after(seven.TouchManager.className, seven.KeyboardSender.className);
 //{INSERTORDER:4}
     class MouseSender extends seven.TouchSender {
         constructor() {
@@ -2876,15 +2189,13 @@ seven.ClassLoader.manager().after(seven.TouchManager.className, seven.KeyboardSe
             this.mousePressedDown = false;
             this.startOrgin = seven.Orgin.empty();
         }
-        getClassName() {
-            return MouseSender.className;
-        }
+        getClassName() { return MouseSender.classname; }
         /**
          * This gives the instance, which was loaded by the Classloader
          * You can use this to access this instance afterwoulds-or don't, you decide
         */
         static loadedInstance() {
-            var loadedInstance = seven.ClassLoader.manager().getLoadedInstance(MouseSender.className);
+            var loadedInstance = seven.ClassLoader.manager().getLoadedInstance(MouseSender.classname);
             if (loadedInstance != undefined) {
                 return loadedInstance;
             }
@@ -2926,7 +2237,7 @@ seven.ClassLoader.manager().after(seven.TouchManager.className, seven.KeyboardSe
         }
         /* Callback functions for Events */
         mousedown(event) {
-            this.time = setTimeout(() => {
+            this.time = window.setTimeout(() => {
                 this.mousePressed();
             }, 100);
             var userInfo = this.getUserInfo(event);
@@ -3025,9 +2336,9 @@ seven.ClassLoader.manager().after(seven.TouchManager.className, seven.KeyboardSe
             this.mousePressedDown = false;
         }
     }
-    MouseSender.className = "seven.MouseSender";
+    //AutoGeneratedClassName-start - do not eidt this line
+    MouseSender.classname = "seven.MouseSender";
     seven.MouseSender = MouseSender;
-seven.ClassLoader.manager().after(seven.TouchManager.className, seven.MouseSender.className);
 //{INSERTORDER:2}
 /**
  * @class represents a Rectangle in 2d - space
@@ -3041,6 +2352,7 @@ seven.ClassLoader.manager().after(seven.TouchManager.className, seven.MouseSende
             this.widthSize = width;
             this.heightSize = height;
         }
+        getClassName() { return Rect.classname; }
         /**
          *
          * @param object a valid rect object
@@ -3294,13 +2606,16 @@ seven.ClassLoader.manager().after(seven.TouchManager.className, seven.MouseSende
             return newRect;
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    Rect.classname = "seven.Rect";
     seven.Rect = Rect;
-//{INSERTORDER:3}
     class TapGestureCallback extends seven.GestureCallback {
         constructor() {
             super();
+            //AutoGeneratedClassName-end - do not eidt this line
             this.tapNumber = 0;
         }
+        getClassName() { return TapGestureCallback.classname; }
         static keyOf(values) {
             TapGestureCallback.keyGenerator.tapNumber = values.get("tapCount");
             return TapGestureCallback.keyGenerator.getKey();
@@ -3333,171 +2648,159 @@ seven.ClassLoader.manager().after(seven.TouchManager.className, seven.MouseSende
             }
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    TapGestureCallback.classname = "seven.TapGestureCallback";
     TapGestureCallback.keyGenerator = new TapGestureCallback();
     seven.TapGestureCallback = TapGestureCallback;
-//{INSERTORDER:3}
-    class ViewController extends seven.AbstractViewController {
+//{INSERTORDER:2}
+    class TouchInterpreterConfiguration extends seven.JBObject {
+        //AutoGeneratedClassName-end - do not eidt this line
         constructor() {
             super();
         }
-        documentController() {
-            seven.Objects.requireNonNull("ViewController.docuemntController : tried to access nonnull value", seven.JBDocument.document().documentController);
-            return seven.JBDocument.document().documentController;
+        getClassName() { return TouchInterpreterConfiguration.classname; }
+    }
+    //AutoGeneratedClassName-start - do not eidt this line
+    TouchInterpreterConfiguration.classname = "seven.TouchInterpreterConfiguration";
+    seven.TouchInterpreterConfiguration = TouchInterpreterConfiguration;
+//{INSERTORDER:4}
+    class TouchManager extends seven.JBObject {
+        constructor() {
+            super();
+            //reciever
+            this.recievers = new Array();
         }
-        get windowController() {
-            seven.Objects.requireNonNull("ViewController.windowController : tried to access nonnull value", this._windowController);
-            return this._windowController;
+        getClassName() { return TouchManager.classname; }
+        static manager() {
+            if (TouchManager._instance == undefined) {
+                TouchManager._instance = new TouchManager();
+                TouchManager._instance.senderConfiguration = new seven.TouchSenderConfiguration();
+                TouchManager._instance.interpreterConfiguration = new seven.TouchInterpreterConfiguration();
+                TouchManager._instance.gestureConfiguration = new seven.GestureConfiguration();
+            }
+            return TouchManager._instance;
         }
-        set windowController(value) {
-            this._windowController = value;
+        /**
+         * This gives the instance, which was loaded by the Classloader
+         * You can use this to access this instance afterwoulds-or don't, you decide
+        */
+        static loadedInstance() {
+            return TouchManager.manager();
         }
-        setParentViewController(viewController) {
-            this.parentViewController = viewController;
-            if (viewController.getClassName() == seven.WindowController.className) {
-                this.windowController = viewController;
+        // sender 
+        get keyboardSender() {
+            return this._keyboardSender;
+        }
+        set keyboardSender(sender) {
+            this._keyboardSender = sender;
+            sender.touchReciever = this;
+            sender.setConfiguration(this.senderConfiguration);
+            // sender.addEventReciever(this.scrollIntepreter);
+        }
+        get mouseSender() {
+            return this._mouseSender;
+        }
+        set mouseSender(sender) {
+            this._mouseSender = sender;
+            sender.touchReciever = this;
+            sender.setConfiguration(this.senderConfiguration);
+            //sender.addEventReciever(this.dragIntepreter);
+            //sender.addEventReciever(this.tapGesture);
+            //sender.addEventReciever(this.scrollIntepreter);
+        }
+        get screenSender() {
+            return this._screenSender;
+        }
+        set screenSender(sender) {
+            this._screenSender = sender;
+            sender.touchReciever = this;
+            sender.setConfiguration(this.senderConfiguration);
+            // sender.addEventReciever(this.dragIntepreter);
+            //sender.addEventReciever(this.tapGesture);
+            //sender.addEventReciever(this.scrollIntepreter);
+        }
+        //interpreter
+        get dragIntepreter() {
+            return this._dragIntepreter;
+        }
+        set dragIntepreter(intepreter) {
+            this._dragIntepreter = intepreter;
+        }
+        get scrollIntepreter() {
+            return this._scrollInterpreter;
+        }
+        set scrollIntepreter(intepreter) {
+            this._scrollInterpreter = intepreter;
+        }
+        //gesture
+        get tapGesture() {
+            return this._tapGesture;
+        }
+        set tapGesture(value) {
+            this._tapGesture = value;
+            this._tapGesture.setConfiguration(this.gestureConfiguration);
+        }
+        //reciever
+        addTouchReciever(touchReciever) {
+            this.recievers.push(touchReciever);
+        }
+        touchBegan(touchEvent) {
+            for (let reciever of this.recievers) {
+                reciever.touchBegan(touchEvent);
+            }
+        }
+        touchMoved(touchEvent) {
+            for (let reciever of this.recievers) {
+                reciever.touchMoved(touchEvent);
+            }
+        }
+        touchEnded(touchEvent) {
+            for (let reciever of this.recievers) {
+                reciever.touchEnded(touchEvent);
+            }
+        }
+        touchCanceled(touchEvent) {
+            for (let reciever of this.recievers) {
+                reciever.touchCanceled(touchEvent);
             }
         }
     }
-    seven.ViewController = ViewController;
+    //AutoGeneratedClassName-start - do not eidt this line
+    TouchManager.classname = "seven.TouchManager";
+    seven.TouchManager = TouchManager;
+seven.ClassLoader.manager().loadInstance(seven.TouchManager.classname);
 //{INSERTORDER:3}
-    class WindowController extends seven.AbstractViewController {
+    class CanvasWindow extends seven.JMBWindow {
         constructor() {
             super();
         }
-        getClassName() {
-            return WindowController.className;
+        getClassName() { return CanvasWindow.classname; }
+        static new(canvasID, rect, controller = new seven.ViewController()) {
+            return new CanvasWindow().initWithId(canvasID, rect, controller);
         }
-        setWindow(window) {
-            this.window = window;
-        }
-        addChildViewController(viewController) {
-            viewController.setParentViewController(this);
-            viewController.windowController = this;
-            this.childViewController.push(viewController);
-        }
-    }
-    WindowController.className = "WindowController";
-    seven.WindowController = WindowController;
-//{INSERTORDER:3}
-/**
- * A canvasView represents no html element
- * all canvasViews get drawn on a containing html-canvas
- * whens its time to render it gets the htmlCanvas from the containing HtmlCanvas
- *
-*/
-    /// < V
-    class CanvasView extends seven.View {
-        constructor() {
-            super();
-            this.viewExtentions = new Array();
-        }
-        initWithReferenceFrame(frame) {
-            super.initWithReferenceFrame(frame);
+        initWithId(htmlId, rect, controller) {
+            super.init(htmlId, controller);
+            this.controller.view = new seven.HtmlCanvasView(this.htmlElementId).initWitFrame(rect);
+            this.view = this.controller.view;
             return this;
         }
-        /**
-         *
-         * @param id an html id
-         * @param opacity the opacity with wich the container should be inited
-         */
-        createHtmlContainer(id, opacity) {
-            var canvasContainer = document.createElement("CANVAS");
-            canvasContainer.id = id;
-            canvasContainer.style.zIndex = "10";
-            canvasContainer.style.position = "fixed";
-            canvasContainer.style.opacity = opacity != undefined ? opacity : "0.8";
-            document.body.appendChild(canvasContainer);
-            var htmlCanavsView = new seven.HtmlCanvasView(id);
-            htmlCanavsView.zIndex = 10;
-            return htmlCanavsView;
+        setupView() {
+            this.view = new seven.HtmlCanvasView(this.htmlElementId);
         }
-        // returns the context of the HtmlCanvas
-        getContext() {
-            if (this.context) {
-                return this.context;
-            }
-            if (this.superView) {
-                return this.superView.getContext();
-            }
-        }
-        /**
-         * adds an extention to the view(border)
-         * @param extention a valid extention
-         */
-        addViewExtention(extention) {
-            this.viewExtentions.push(extention);
-        }
-        //@override
-        draw(orgin) {
-            if (this.hidden == true) {
-                return;
-            }
-            var drawRect = seven.Rect.copyRect(this.appliadFrame);
-            drawRect.setX(drawRect.x() + orgin.x);
-            drawRect.setY(drawRect.y() + orgin.y);
-            this.totalOffset = drawRect.orgin();
-            if (this.appliadFrame.x() < 0) {
-                var diff = this.appliadFrame.x();
-                drawRect.setX(drawRect.x() - diff);
-                drawRect.setWidth(drawRect.width() + diff);
-            }
-            if (this.appliadFrame.y() < 0) {
-                var diff = this.appliadFrame.y();
-                drawRect.setY(drawRect.y() - diff);
-                drawRect.setHeight(drawRect.height() + diff);
-            }
-            if (this.backgroundColor == undefined) {
-                this.backgroundColor = "white"; //ViewUtility.randomColor();
-            }
-            if (this.strokeColor) {
-                this.getContext().strokeStyle = "" + this.strokeColor;
-                this.getContext().strokeRect(drawRect.x(), drawRect.y(), drawRect.width(), this.appliadFrame.height());
-            }
-            this.drawBackground(drawRect);
-            this.drawInRect(drawRect);
-            this.drawSubViews(drawRect.orgin());
-            this.drawViewExtentions(drawRect);
-            this.drawDebug();
-        }
-        drawBackground(drawRect) {
-            this.getContext().fillStyle = "" + this.backgroundColor;
-            this.getContext().fillRect(drawRect.x(), drawRect.y(), drawRect.width(), this.appliadFrame.height());
-            this.getContext().fillStyle = "black";
-        }
-        drawInRect(rect) {
-            //this.getContext().fillText(rect.toString(),rect.x(),rect.y()+10);
-        }
-        drawViewExtentions(rect) {
-            for (let extention of this.viewExtentions) {
-                extention.drawInContext(this.getContext(), rect);
-            }
-            if (this.additionalDrawing) {
-                this.additionalDrawing.call(this, this.getContext(), rect);
-            }
-            // this.getContext().fillText(rect.toString(),rect.x(),rect.y()+10);
-        }
-        drawDebug() {
-            //  this.getContext().fillText(rect.toString(),rect.x(),rect.y()+10);
-        }
-        //@Override View
-        copyAttributes(toObject) {
-            super.copyAttributes(toObject);
-            toObject.superView = this.superView;
-            toObject.context = this.context;
-        }
-        //@Override - View 
-        copy() {
-            var newPrototypeTableCell = new CanvasView();
-            this.copyAttributes(newPrototypeTableCell);
-            return newPrototypeTableCell;
+        remove() {
+            this.view.remove();
         }
     }
-    seven.CanvasView = CanvasView;
+    //AutoGeneratedClassName-start - do not eidt this line
+    CanvasWindow.classname = "seven.CanvasWindow";
+    seven.CanvasWindow = CanvasWindow;
 //{INSERTORDER:3}
     class ClickGestureCallback extends seven.GestureCallback {
+        //AutoGeneratedClassName-end - do not eidt this line
         constructor() {
             super();
         }
+        getClassName() { return ClickGestureCallback.classname; }
         static keyOf(values) {
             return ClickGestureCallback.keyGenerator.getKey();
         }
@@ -3516,19 +2819,57 @@ seven.ClassLoader.manager().after(seven.TouchManager.className, seven.MouseSende
             return newObject;
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    ClickGestureCallback.classname = "seven.ClickGestureCallback";
     ClickGestureCallback.keyGenerator = new ClickGestureCallback();
     seven.ClickGestureCallback = ClickGestureCallback;
 //{INSERTORDER:3}
-    class DocumentController extends seven.AbstractViewController {
-        constructor() {
+/**
+ * a wrapper for a div - htmlelement
+ *
+*/
+    class HtmlElementView extends seven.View {
+        /**
+         *
+         * @param canvasId the html-id of the canvas
+         */
+        constructor(elementId) {
             super();
+            this.elementId = elementId;
+            this.element = document.getElementById(elementId);
+            Object.freeze(this.element);
+            if (this.element) {
+                seven.Logger.develepor("element already exists for Id : " + this.elementId);
+                return;
+            }
+            this.element = document.createElement(this.getType());
+            this.element.id = elementId;
+            this.element.style.position = "fixed";
+            this.element.style.display = "none";
+            document.body.appendChild(this.element);
         }
-        addChildViewController(viewController) {
-            viewController.setParentViewController(this);
-            this.childViewController.push(viewController);
+        setSuperView(view) {
+            super.setSuperView(view);
+            this.element.style.display = "inline";
+        }
+        drawInRect(rect) {
+            this.element.style.left = "" + rect.x() + "px";
+            this.element.style.top = "" + rect.y() + "px";
+            this.element.style.backgroundColor = this.style.getBackGroundColor();
+            this.element.style.width = "" + rect.width() + "px";
+            this.element.style.height = "" + rect.height() + "px";
+        }
+        remove() {
+            super.remove();
+            if (this.element && this.element.parentElement) {
+                this.element.parentElement.removeChild(this.element);
+            }
+        }
+        getType() {
+            return "div";
         }
     }
-    seven.DocumentController = DocumentController;
+    seven.HtmlElementView = HtmlElementView;
 //{INSERTORDER:4}
     class ScreenSender extends seven.TouchSender {
         constructor() {
@@ -3538,15 +2879,13 @@ seven.ClassLoader.manager().after(seven.TouchManager.className, seven.MouseSende
             this.hasLongTouch = false;
             this.startOrgin = seven.Orgin.empty();
         }
-        getClassName() {
-            return ScreenSender.className;
-        }
+        getClassName() { return ScreenSender.classname; }
         /**
          * This gives the instance, which was loaded by the Classloader
          * You can use this to access this instance afterwoulds-or don't, you decide
         */
         static loadedInstance() {
-            var loadedInstance = seven.ClassLoader.manager().getLoadedInstance(ScreenSender.className);
+            var loadedInstance = seven.ClassLoader.manager().getLoadedInstance(ScreenSender.classname);
             if (loadedInstance != undefined) {
                 return loadedInstance;
             }
@@ -3673,400 +3012,149 @@ seven.ClassLoader.manager().after(seven.TouchManager.className, seven.MouseSende
             clearTimeout(this.longPressTimer);
         }
     }
-    ScreenSender.className = "seven.ScreenSender";
+    //AutoGeneratedClassName-start - do not eidt this line
+    ScreenSender.classname = "seven.ScreenSender";
     seven.ScreenSender = ScreenSender;
-seven.ClassLoader.manager().after(seven.TouchManager.className, seven.ScreenSender.className);
-//{INSERTORDER:3}
-    class ScrollTouchInterpreter extends seven.TouchIntepreter {
-        constructor() {
-            super();
-            this.animationStart = undefined;
-            this.ignoreScroll = false;
-            this.animationY = 0;
-            this.setDelegate(seven.JBDocument.document());
-            seven.JBNotificationCenter.touchEventManager().addObserverForName("dragStart", new seven.Observer(this, this.ignoreScrolling, undefined));
-            seven.JBNotificationCenter.touchEventManager().addObserverForName("dragEnd", new seven.Observer(this, this.activateScrolling, undefined));
-        }
-        /**
-         * This gives the instance, which was loaded by the Classloader
-         * You can use this to access this instance afterwoulds-or don't, you decide
-        */
-        static loadedInstance() {
-            var loadedInstance = seven.ClassLoader.manager().getLoadedInstance(ScrollTouchInterpreter.className);
-            if (loadedInstance != undefined) {
-                return loadedInstance;
-            }
-            var scrollInterpreter = new ScrollTouchInterpreter();
-            seven.TouchManager.manager().scrollIntepreter = scrollInterpreter;
-            return scrollInterpreter;
-        }
-        setDelegate(delegate) {
-            this.delegate = delegate;
-        }
-        touchstart(event, touchEvent) {
-            //     this.animationY = 0;
-        }
-        touchmove(event, touchEvent) {
-            if (this.ignoreScroll == true) {
-                return;
-            }
-            var movedX = touchEvent.getDifference().x;
-            this.movedY = touchEvent.getDifference().y;
-            if (this.movedY < -5 || this.movedY > 5) {
-                this.animationY += this.movedY * 5;
-            }
-            else {
-                this.animationY = 0;
-            }
-            console.log("screen " + touchEvent.getDifference().y);
-            this.moveOrgin = touchEvent.getOrgin().copy();
-            this.delegate.scrollMove(this.moveOrgin, new seven.Orgin(movedX, this.movedY));
-        }
-        touchend(event, touchEvent) {
-            this.startAnimation();
-        }
-        touchcancel(event, touchEvent) {
-        }
-        startAnimation() {
-            if (this.animationY < -10 && this.animationY > 10) {
-                return;
-            }
-            this.animate();
-        }
-        animate() {
-            if (this.animationY <= 0 && this.animationY > -10) {
-                return;
-            }
-            if (this.animationY >= 0 && this.animationY < 10) {
-                return;
-            }
-            var animationBite = this.animationY * 0.1;
-            this.animationY -= animationBite;
-            console.log(animationBite + "bite" + Math.abs(Math.round(animationBite)));
-            var time = 10;
-            if (Math.abs(animationBite) < 50) {
-                time = 5;
-            }
-            if (Math.abs(animationBite) < 10) {
-                time = 3;
-            }
-            if (Math.abs(animationBite) < 2) {
-                time = 1;
-            }
-            console.log("time" + time);
-            this.delegate.scrollMove(this.moveOrgin, new seven.Orgin(0, this.movedY));
-            setTimeout(() => { this.animate(); }, time);
-        }
-        mousedown(event, touchEvent) {
-            this.keyboardTouchOrgin = touchEvent.getOrgin().copy();
-        }
-        mouseup(event, touchEvent) {
-            this.keyboardTouchOrgin = touchEvent.getOrgin().copy();
-        }
-        mousemove(event, touchEvent) {
-            this.keyboardTouchOrgin = touchEvent.getOrgin().copy();
-        }
-        mouseout(event, touchEvent) {
-            //  this.keyboardTouchOrgin = undefined;
-        }
-        mousewheel(event) {
-            //console.log("x " + event.deltaX + " y " + event.deltaY);
-            var movedX = event.deltaX;
-            var movedY = event.deltaY;
-            this.moveOrgin = new seven.Orgin(event.clientX, event.clientY);
-            //console.log(new Orgin(movedX, movedY).toString());
-            this.delegate.scrollMove(this.moveOrgin, new seven.Orgin(movedX, movedY));
-            /*   if(  this.movedY > 0 ){
-                   this.move();
-               }
-               else{
-                   this.moveUp();
-               }
-               */
-        }
-        move() {
-            this.delegate.scrollMove(this.moveOrgin, new seven.Orgin(0, 50));
-            var that = this;
-            if (this.stop == true) {
-                return;
-            }
-            setTimeout(function () {
-                if (that.movedY > 0) {
-                    that.movedY -= 50;
-                    that.move();
-                }
-            }, 12);
-        }
-        moveUp() {
-            this.delegate.scrollMove(this.moveOrgin, new seven.Orgin(0, -50));
-            var that = this;
-            if (this.stop == true) {
-                return;
-            }
-            setTimeout(function () {
-                if (that.movedY < 0) {
-                    that.movedY += 50;
-                    that.moveUp();
-                }
-            }, 12);
-        }
-        keyDown(event, touchEvent) {
-            if (this.keyboardTouchOrgin == undefined) {
-                console.log("keyboardTouchOrgin = undefined");
-                return;
-            }
-            this.delegate.scrollMove(this.keyboardTouchOrgin.copy(), touchEvent.getDifference());
-        }
-        keyUp(event, touchEvent) {
-        }
-        keyPress(event, touchEvent) {
-        }
-        /* */
-        ignoreScrolling() {
-            this.ignoreScroll = true;
-        }
-        activateScrolling() {
-            this.ignoreScroll = false;
-        }
-    }
-    ScrollTouchInterpreter.className = "seven.ScrollTouchInterpreter";
-    seven.ScrollTouchInterpreter = ScrollTouchInterpreter;
-seven.ClassLoader.manager().loadInstance(seven.ScrollTouchInterpreter.className);
 //{INSERTORDER:2}
-    class SizeLoader extends seven.JBObject {
-        constructor() {
+    class SizeClass extends seven.JBObject {
+        constructor(id, width, height, description) {
             super();
-            this.sizes = new seven.JMBMap();
-            this.variables = new seven.JMBMap();
+            this.description = "<>";
+            this.id = id;
+            this.width = width;
+            this.height = height;
+            this.description = description;
         }
-        /**
-            * This gives the instance, which was loaded by the Classloader
-            * You can use this to access this instance afterwoulds-or don't, you decide
-        */
-        static loadedInstance() {
-            var loadedInstance = seven.ClassLoader.manager().getLoadedInstance(SizeLoader.className);
-            if (loadedInstance != undefined) {
-                return loadedInstance;
-            }
-            var sizeLoader = new SizeLoader();
-            sizeLoader.activeSizeCatalog = sizeLoader.getXMLSizeCatalog();
-            seven.JBDocument.document().setSizeLoader(sizeLoader);
-            return sizeLoader;
+        getClassName() { return SizeClass.classname; }
+        static fromXML(xml) {
+            var width = seven.Objects.requireNumber("SizeClass.fromXML : width was not defined/not a number", xml.attributes.getNamedItem("width").value);
+            var height = seven.Objects.requireNumber("SizeClass.fromXML : hieght was not defined/not a number", xml.attributes.getNamedItem("height").value);
+            var id = seven.Objects.requireNonNull("SizeClass.fromXML : id was not defined", xml.attributes.getNamedItem("id").value);
+            var description = seven.Objects.orElse(xml.attributes.getNamedItem("description").value, "");
+            return new SizeClass(id, width, height, description);
         }
-        getClassName() {
-            return SizeLoader.className;
+        getId() {
+            return this.id;
         }
-        initWithOptions(options) {
-            this.activeSizeCatalog = this.getXMLSizeCatalog();
+        setWidth(width) {
+            this.width = width;
         }
-        getSizeForKey(key) {
-            if (this.sizes.containsKey(key) == true) {
-                return this.sizes.get(key);
-            }
-            return undefined;
+        getWidth() {
+            return this.width;
         }
-        getSizeRectForKey(key) {
-            var frame = undefined;
-            if (this.sizes.containsKey(key) == true) {
-                return this.sizes.get(key).getFrameForClass(this.getSizeClass()).copy();
-            }
-            seven.Logger.develeporError("SizeLoader : getSizeRectForKey : no size for key key <" + key + ">");
-            return seven.Rect.empty();
+        setHeight(height) {
+            this.height = height;
         }
-        getSizeClass() {
-            return this.activeSizeCatalog.getSizeClass();
+        getHeight() {
+            return this.height;
         }
-        changeSizeClass(width, height) {
-            this.activeSizeCatalog.changeForSize(width, height);
+        asRect() {
+            return new seven.Rect(this.width, this.height, this.width, this.height);
         }
-        getBaseClass() {
-            return this.activeSizeCatalog.getBaseClass();
+        getDescription() {
+            return this.description;
         }
-        getXMLSizeCatalog(key = "default") {
-            var catalogXML = sizeXML.getElementById(key);
-            if (catalogXML == undefined || catalogXML == null) {
-                throw new Error("catalog for key <" + key + "> was not defined.");
-            }
-            var catalog = new seven.SizeCatalog(key);
-            var baseClassXML = catalogXML.getElementsByTagName("baseClass")[0];
-            if (baseClassXML == undefined || baseClassXML == null) {
-                throw new Error("no baseClass in catalog <" + key + ">.");
-            }
-            catalog.setBaseClass(seven.SizeClass.fromXML(baseClassXML));
-            for (let classes of catalogXML.getElementsByTagName("sizeClass")) {
-                catalog.addSizeClasses(seven.SizeClass.fromXML(classes));
-            }
-            for (let xmlVaraiable of sizeXML.getElementsByTagName("variable")) {
-                var variable = seven.Variable.fromXML(xmlVaraiable);
-                this.variables.put(variable.id, variable);
-            }
-            for (let sizesXml of sizeXML.getElementsByTagName("size")) {
-                var size = seven.Size.fromXML(sizesXml, this, this.variables);
-                this.sizes.put(size.id, size);
-            }
-            return catalog;
+        setDescription(description) {
+            this.description = description;
+        }
+        //@Override JBObject
+        copyAttributes(toObject) {
+            toObject.width = this.width;
+            toObject.height = this.height;
+            toObject.description = this.description;
+        }
+        //@Override JBObject
+        copy() {
+            var newSizeClass = new SizeClass(this.id, this.width, this.height);
+            this.copyAttributes(newSizeClass);
+            return newSizeClass;
         }
     }
-    SizeLoader.className = "seven.SizeLoader";
-    seven.SizeLoader = SizeLoader;
-seven.ClassLoader.manager().loadInstanceAtPriority(seven.SizeLoader.className, 0);
-//{INSERTORDER:2}
-    class GestureConfiguration extends seven.JBObject {
-        constructor() {
-            super();
-            // this shows how much the user can move the mouse from mouseDown to mouseUp
-            // to be valid click
-            // it this case it means 10 px
-            this.mouseClickRange = new seven.Rect(-5, -5, 10, 10);
-            // this shows how much the user can move his finger from touchStart till touchEnd
-            // to be valid click
-            // it this case it means 20 px
-            this.screenClickRange = new seven.Rect(-20, -20, 40, 40);
-            // if the next tap happens within this time it gets added to the tapCount
-            // ie. tapCount=1 -> next tap within time -> tapCount=2
-            // else it will be treated as a new tap(tapCount=1)
-            this.tapRetouchTimeout = 300 /* ms*/;
-            // if the mouse/touch is held down too long it is no longer a tap
-            this.tapMaximumTouchDown = 500;
-        }
-        getMouseClickRange() {
-            return this.mouseClickRange;
-        }
-        setMouseClickRange(range) {
-            this.mouseClickRange = range;
-        }
-        getScreenClickRange() {
-            return this.screenClickRange;
-        }
-        setScreenClickRange(range) {
-            this.screenClickRange = range;
-        }
-        getTapRetouchTimeout() {
-            return this.tapRetouchTimeout;
-        }
-        getTapMaximumTouchDowm() {
-            return this.tapMaximumTouchDown;
-        }
-    }
-    seven.GestureConfiguration = GestureConfiguration;
+    //AutoGeneratedClassName-start - do not eidt this line
+    SizeClass.classname = "seven.SizeClass";
+    seven.SizeClass = SizeClass;
 //{INSERTORDER:3}
 /**
  * this class represents a HTMLCanvas
  *  rendering means positing the htmlelement on the screen
  *
  */
-    class HtmlCanvasView extends seven.View {
+    class HtmlCanvasView extends seven.HtmlElementView {
         /**
          *
          * @param canvasId the html-id of the canvas
          */
         constructor(canvasId) {
-            super();
+            super(canvasId);
+            //AutoGeneratedClassName-end - do not eidt this line
             this.canavsRect = seven.Rect.empty();
-            this.viewExtentions = new Array();
-            this.canvasId = canvasId;
-            this.canvas = document.getElementById(canvasId);
-            Object.freeze(this.canvas);
-            if (this.canvas) {
-                if (this.canvas != undefined) {
-                    this.context = this.canvas.getContext('2d');
+            if (this.element) {
+                if (this.element != undefined) {
+                    this.context = this.element.getContext('2d');
                     Object.freeze(this.context);
                 }
-                seven.Logger.develepor("canvas already exists for Id : " + this.canvasId);
                 return;
             }
-            this.backgroundColor = "white"; //ViewUtility.randomColor();
-            this.canvas = document.createElement("canvas");
-            this.backgroundColor = seven.ViewUtility.randomColor();
-            this.canvas.id = canvasId;
-            this.canvas.style.position = "fixed";
-            this.canvas.style.display = "none";
-            document.body.appendChild(this.canvas);
-            if (this.canvas != undefined) {
-                this.context = this.canvas.getContext('2d');
-                Object.freeze(this.context);
-            }
         }
-        addViewExtention(extention) {
-            this.viewExtentions.push(extention);
-        }
-        setSuperView(view) {
-            super.setSuperView(view);
-            this.canvas.style.display = "inline";
-        }
-        draw(orgin) {
-            this.canavsRect = seven.Rect.copyRect(this.appliadFrame);
-            this.canavsRect.addOrgin(orgin);
-            this.canvas.style.left = "" + this.canavsRect.x() + "px";
-            this.canvas.style.top = "" + this.canavsRect.y() + "px";
-            this.canvas.style.backgroundColor = this.backgroudColor;
-            this.canvas.width = this.appliadFrame.width();
-            this.canvas.height = this.appliadFrame.height();
-            this.context.clearRect(0, 0, this.appliadFrame.width(), this.appliadFrame.height());
-            for (let extention of this.viewExtentions) {
-                extention.drawOnElement(this.canvas);
-            }
-            this.canvas.style.zIndex = "" + this.getZIndex();
-            this.drawSubViews(new seven.Orgin(0, 0));
+        getClassName() { return HtmlCanvasView.classname; }
+        drawInRect(rect) {
+            super.drawInRect(rect);
+            this.canavsRect = seven.Rect.copyRect(rect);
+            this.context.clearRect(0, 0, rect.width(), rect.height());
         }
         getContext() {
             return this.context;
         }
         remove() {
             super.remove();
-            if (this.canvas && this.canvas.parentElement) {
-                this.canvas.parentElement.removeChild(this.canvas);
-            }
         }
         addScreenOffset() {
             return this.canavsRect.orgin();
         }
+        getType() {
+            return "canvas";
+        }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    HtmlCanvasView.classname = "seven.HtmlCanvasView";
     seven.HtmlCanvasView = HtmlCanvasView;
-    class TraillingContraint extends seven.JBObject {
-        constructor() {
-            super(...arguments);
-            this.trailing = 0;
-        }
-        applyContraint(srcView, comparingView) {
-            srcView.referenceFrame.setWidth(comparingView.referenceFrame.width() - srcView.referenceFrame.x() - this.trailing);
-            srcView.changeReferenceFrame(srcView.referenceFrame);
-        }
-        init(trailing) {
-            this.trailing = trailing;
-            return this;
-        }
-        getClassName() {
-            return TraillingContraint.className;
-        }
-    }
-    TraillingContraint.className = "seven.constraint.TraillingContraint";
-    seven.TraillingContraint = TraillingContraint;
-//{INSERTORDER:3}
-/**
- * the view of the JBDocument
- * all windowViews are attached to here
-*/
-    class DocumentView extends seven.View {
+//{INSERTORDER:2}
+    class TouchSenderConfiguration extends seven.JBObject {
         constructor() {
             super();
+            //AutoGeneratedClassName-end - do not eidt this line
+            this.keyHoldMove = 400;
+            this.screenLongPressTime = 300;
+            this.mouseLongPressTime = 100;
         }
-        get rect() {
-            return this.referenceFrame;
+        getClassName() { return TouchSenderConfiguration.classname; }
+        getKeyHoldMove() {
+            return this.keyHoldMove;
         }
-        getZIndex() {
-            return 0;
+        setKeyHoldMove(value) {
+            this.keyHoldMove = value;
         }
-        //@override
-        draw() {
-            throw new Error("this view cannot be drawn. this should only be used for sizing the subviews");
+        setScreenLongPressTime(longPressTime) {
+            this.screenLongPressTime = longPressTime;
+        }
+        getScreenLongPressTime() {
+            return this.screenLongPressTime;
+        }
+        setMouseLongPressTime(longPressTime) {
+            this.mouseLongPressTime = longPressTime;
+        }
+        getMouseLongPressTime() {
+            return this.mouseLongPressTime;
         }
     }
-    seven.DocumentView = DocumentView;
+    //AutoGeneratedClassName-start - do not eidt this line
+    TouchSenderConfiguration.classname = "seven.TouchSenderConfiguration";
+    seven.TouchSenderConfiguration = TouchSenderConfiguration;
     class Gesture extends seven.JBObject {
         constructor() {
             super();
         }
+        getClassName() { return Gesture.classname; }
         setDelegate(delegate) {
             this.delegate = delegate;
         }
@@ -4113,7 +3201,26 @@ seven.ClassLoader.manager().loadInstanceAtPriority(seven.SizeLoader.className, 0
             return true;
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    Gesture.classname = "seven.Gesture";
     seven.Gesture = Gesture;
+//{INSERTORDER:3}
+    class ViewController extends seven.AbstractViewController {
+        constructor() {
+            super();
+        }
+        getClassName() { return ViewController.classname; }
+        documentController() {
+            seven.Objects.requireNonNull("ViewController.docuemntController : tried to access nonnull value", seven.JBDocument.document().documentController);
+            return seven.JBDocument.document().documentController;
+        }
+        setParentViewController(viewController) {
+            this.parentViewController = viewController;
+        }
+    }
+    //AutoGeneratedClassName-start - do not eidt this line
+    ViewController.classname = "seven.ViewController";
+    seven.ViewController = ViewController;
 //{INSERTORDER:4}
     class TapGesture extends seven.Gesture {
         constructor() {
@@ -4123,6 +3230,7 @@ seven.ClassLoader.manager().loadInstanceAtPriority(seven.SizeLoader.className, 0
             this.firstTouchOrgin = seven.Orgin.empty();
             this.setDelegate(seven.JBDocument.document());
         }
+        getClassName() { return TapGesture.classname; }
         /**
          * This gives the instance, which was loaded by the Classloader
          * You can use this to access this instance afterwoulds-or don't, you decide
@@ -4135,9 +3243,6 @@ seven.ClassLoader.manager().loadInstanceAtPriority(seven.SizeLoader.className, 0
             var clickGesture = new TapGesture();
             seven.TouchManager.manager().tapGesture = clickGesture;
             return clickGesture;
-        }
-        getClassName() {
-            return TapGesture.className;
         }
         setDelegate(delegate) {
             this.delegate = delegate;
@@ -4170,7 +3275,7 @@ seven.ClassLoader.manager().loadInstanceAtPriority(seven.SizeLoader.className, 0
         start() {
             console.log("start");
             clearTimeout(this.nextTouchTimer);
-            this.touchDownTimer = setTimeout(() => {
+            this.touchDownTimer = window.setTimeout(() => {
                 this.tapCount = 0;
                 this.firstTouchOrgin = seven.Orgin.empty();
             }, this.configuration.getTapMaximumTouchDowm());
@@ -4180,7 +3285,7 @@ seven.ClassLoader.manager().loadInstanceAtPriority(seven.SizeLoader.className, 0
             clearTimeout(this.nextTouchTimer);
             clearTimeout(this.touchDownTimer);
             this.checkForClick(range);
-            this.nextTouchTimer = setTimeout(() => {
+            this.nextTouchTimer = window.setTimeout(() => {
                 this.sendEvent(true);
                 this.tapCount = 0;
                 this.firstTouchOrgin = seven.Orgin.empty();
@@ -4194,6 +3299,7 @@ seven.ClassLoader.manager().loadInstanceAtPriority(seven.SizeLoader.className, 0
                 this.tapCount++;
                 this.sendEvent(false);
                 console.log("tapped");
+                // this.delegate.tapRecieved(this.touchEndPosition.getOrgin(), this.getDelegateData());
             }
             this.touchBeganPosition = undefined;
             //this.touchEndPosition = undefined;
@@ -4216,241 +3322,30 @@ seven.ClassLoader.manager().loadInstanceAtPriority(seven.SizeLoader.className, 0
             return this.delegateData;
         }
     }
+    //AutoGeneratedClassName-start - do not eidt this line
+    TapGesture.classname = "seven.TapGesture";
     TapGesture.className = "seven.TapGesture";
     seven.TapGesture = TapGesture;
 seven.ClassLoader.manager().loadInstance(seven.TapGesture.className);
-window.onload = function () {
-    //classes can register in the global scope and get loaded at this point
-    seven.ClassLoader.manager().startLoading();
-    seven.On.on().call("prepareDocument");
-    seven.On.on().call("prepareDocument-Default");
-    seven.JBDocument.document().prepareLoading();
-    seven.On.on().call("documentDidPrepare");
-    seven.JBDocument.document().load();
-    seven.On.on().call("windowDidLoad", seven.JBDocument.document().getWindows()[0]);
-    seven.JBDocument.document().startRendering();
-};
+    function boot() {
+        //classes can register in the global scope and get loaded at this point
+        seven.ClassLoader.manager().startLoading();
+        seven.On.on().call("prepareDocument");
+        seven.On.on().call("prepareDocument-Default");
+        seven.JBDocument.document().prepareLoading();
+        seven.On.on().call("documentDidPrepare");
+        seven.JBDocument.document().load();
+        seven.On.on().call("documentInitSize");
+        seven.On.on().call("windowDidLoad", seven.JBDocument.document().getWindows()[0]);
+        seven.JBDocument.document().startRendering();
+    }
+    seven.boot = boot;
+    let GestureType;
     (function (GestureType) {
         GestureType[GestureType["None"] = 0] = "None";
         GestureType[GestureType["Click"] = 1] = "Click";
         GestureType[GestureType["Tap"] = 2] = "Tap";
-    })(seven.GestureType || (seven.GestureType = {}));
-    var GestureType = seven.GestureType;
-    (function (Override) {
-        Override[Override["TRUE"] = 0] = "TRUE";
-        Override[Override["FALSE"] = 1] = "FALSE";
-    })(seven.Override || (seven.Override = {}));
-    var Override = seven.Override;
-//auto-generated
-var sizeXMLText = '';
-sizeXMLText += '<sizing>';
-sizeXMLText += '    <avaliableSizes id="avaliableSizes">';
-sizeXMLText += '        <sizeCatalog id="default">';
-sizeXMLText += '            <baseClass id="iPadLandscape" width="1000" height ="768" description="iPadLandscape"/>';
-sizeXMLText += '            <sizeClass id="iPadPortrait" width="768" height ="1000" description="iPadPortrait"/>';
-sizeXMLText += '            <sizeClass id="desktop" width="1300" height="1000" description="Desktop"/>';
-sizeXMLText += '        </sizeCatalog>';
-sizeXMLText += '    </avaliableSizes>';
-sizeXMLText += '    <variables>';
-sizeXMLText += '        <variable id="halfWidth">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  value="384"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" value="500"/>';
-sizeXMLText += '            <sizeClass id="desktop"       value="650"/>';
-sizeXMLText += '        </variable>';
-sizeXMLText += '        <variable id="fullWidth">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  value="768"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" value="1000"/>';
-sizeXMLText += '            <sizeClass id="desktop"       value="1300"/>';
-sizeXMLText += '        </variable>';
-sizeXMLText += '        <variable id="quarterWidth">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  value="192"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" value="250"/>';
-sizeXMLText += '            <sizeClass id="desktop"       value="325"/>';
-sizeXMLText += '        </variable>';
-sizeXMLText += '        <variable id="threeQuarterWidth">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  value="576"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" value="750"/>';
-sizeXMLText += '            <sizeClass id="desktop"       value="975"/>';
-sizeXMLText += '        </variable>';
-sizeXMLText += '        <variable id="overlay.blocklist.width">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  value="434"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" value="480"/>';
-sizeXMLText += '            <sizeClass id="desktop"       value="640"/>';
-sizeXMLText += '        </variable>';
-sizeXMLText += '    </variables>';
-sizeXMLText += '    <sizes>';
-sizeXMLText += '        <!-- main structure !-->';
-sizeXMLText += '        <size id="navbar">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="0" width="var:fullWidth" height="60"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="0" width="var:fullWidth" height="60"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="0" width="var:fullWidth" height="40"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <size id="mainContent">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="60" width="var:fullWidth" height="800"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="60" width="var:fullWidth" height="568"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="40" width="var:fullWidth" height="860"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <size id="workingArea">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="860" width="var:fullWidth" height="140"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="628" width="var:fullWidth" height="140"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="900" width="var:fullWidth" height="100"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <!-- main content !-->';
-sizeXMLText += '        <size id="mainContent.inner">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="0" width="var:fullWidth" height="800"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="0" width="var:fullWidth" height="568"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="0" width="var:fullWidth" height="860"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <!-- history content !-->';
-sizeXMLText += '        <size id="historyElement">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="10" y="10" width="748" height="90"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="20" y="20" width="960" height="70"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="20" y="20" width="1260" height="40"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <!-- blocklist container !-->';
-sizeXMLText += '        <size id="blockListContainer">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="10" y="10" width="748" height="200"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="20" y="20" width="960" height="200"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="20" y="20" width="1260" height="130"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '         <size id="blockListContainer.min">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="30" width="0" height="100"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="30" width="0" height="100"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="10" width="0" height="100"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <size id="blockListContainer.title">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="0" width="748" height="40"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="0" width="960" height="40"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="0" width="1260" height="25"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <size id="blockListEntry">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="20" width="748" height="70"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="20" width="960" height="70"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="10" width="1260" height="30"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <!-- working area !-->';
-sizeXMLText += '        <size id="workingArea.dropArea">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="0" width="var:halfWidth" height="200"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="0" width="var:halfWidth" height="140"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="0" width="var:halfWidth" height="100"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <size id="workingArea.campaign">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="var:halfWidth" y="0" width="var:halfWidth" height="200"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="var:halfWidth" y="0" width="var:halfWidth" height="140"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="var:halfWidth" y="0" width="var:halfWidth" height="100"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '         <size id="workingArea.dropArea.entry">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="0" width="100" height="200"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="0" width="70" height="140"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="0" width="70" height="100"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '         <size id="workingArea.closeButton">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="7" y="7" width="30" height="30"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="7" y="7" width="30" height="30"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="5" y="5" width="25" height="25"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <!-- overlay !-->';
-sizeXMLText += '         <size id="overlay.blocklist">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="320" y="10" width="var:overlay.blocklist.width" height="780"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="var:halfWidth+5" y="10" width="var:overlay.blocklist.width" height="548"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="var:halfWidth+5" y="10" width="var:overlay.blocklist.width" height="840"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <size id="overlay.insertTime">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="var:quarterWidth" y="10" width="var:threeQuarterWidth-20" height="780"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="var:quarterWidth" y="10" width="var:threeQuarterWidth-20" height="548"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="var:quarterWidth" y="10" width="var:threeQuarterWidth-20" height="840"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <!-- overlay.blocklist !-->';
-sizeXMLText += '        <size id="overlay.blocklist.title">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="0" width="var:overlay.blocklist.width" height="30"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="0" width="var:overlay.blocklist.width" height="30"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="0" width="var:overlay.blocklist.width" height="30"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <size id="overlay.blocklist.header">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="30" width="var:overlay.blocklist.width" height="30"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="30" width="var:overlay.blocklist.width" height="30"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="30" width="var:overlay.blocklist.width" height="25"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <size id="overlay.blocklist.table">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="60" width="var:overlay.blocklist.width" height="720"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="60" width="var:overlay.blocklist.width" height="488"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="55" width="var:overlay.blocklist.width" height="785"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '         <size id="overlay.blocklist.closeButton">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="var:overlay.blocklist.width-30" y="0" width="30" height="30"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="var:overlay.blocklist.width-30" y="0" width="30" height="30"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="var:overlay.blocklist.width-30" y="2" width="25" height="25"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '         <size id="overlay.blocklist.errorMessage">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="680" width="var:overlay.blocklist.width" height="100"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="448" width="var:overlay.blocklist.width" height="100"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="740" width="var:overlay.blocklist.width" height="100"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <size id="overlay.blocklist.entry">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="0" width="var:overlay.blocklist.width" height="50"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="0" width="var:overlay.blocklist.width" height="50"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="0" width="var:overlay.blocklist.width" height="30"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <!-- overlay.insertTime !-->';
-sizeXMLText += '         <size id="overlay.insertTime.header">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="0" width="100%" height="80"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="0" width="100%" height="80"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="0" width="100%" height="80"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <size id="overlay.insertTime.graph">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="80" width="100%" height="640"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="80" width="100%" height="408"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="80" width="100%" height="720"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <size id="overlay.insertTime.touchBar">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="720" width="100%" height="80"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="468" width="100%" height="80"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="760" width="100%" height="80"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <size id="overlay.insertTime.table">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="0" width="200" height="800"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="0" width="200" height="800"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="0" width="200" height="800"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        ';
-sizeXMLText += '        <!-- overlay.small !-->';
-sizeXMLText += '        <size id="overlay.insertTime.small">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="10" y="10" width="300" height="330"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="70" y="10" width="350" height="230"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="250" y="20" width="350" height="360"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <size id="overlay.workState.small">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="10" y="350" width="300" height="330"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="70" y="250" width="350" height="230"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="250" y="460" width="350" height="360"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '       ';
-sizeXMLText += '         <!-- overlay.insertTime.small !-->';
-sizeXMLText += '        <size id="overlay.insertTime.small.header">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="0" width="100%" height="40"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="0" width="100%" height="30"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="0" width="100%" height="30"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <size id="overlay.insertTime.small.graph">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="40" width="100%" height="260"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="30" width="100%" height="170"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="30" width="100%" height="300"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '        <size id="overlay.insertTime.small.touchBar">';
-sizeXMLText += '            <sizeClass id="iPadPortrait"  x="0" y="290" width="100%" height="30"/>';
-sizeXMLText += '            <sizeClass id="iPadLandscape" x="0" y="200" width="100%" height="30"/>';
-sizeXMLText += '            <sizeClass id="desktop"       x="0" y="330" width="100%" height="30"/>';
-sizeXMLText += '        </size>';
-sizeXMLText += '    </sizes>';
-sizeXMLText += '</sizing>';
-var parser = new DOMParser();
-var sizeXML = parser.parseFromString(sizeXMLText, "text/xml");
-    (function (StoringType) {
-        StoringType[StoringType["LOCAL"] = 0] = "LOCAL";
-        StoringType[StoringType["REMOTE"] = 1] = "REMOTE";
-        StoringType[StoringType["ALL"] = 2] = "ALL";
-    })(seven.StoringType || (seven.StoringType = {}));
-    var StoringType = seven.StoringType;
+    })(GestureType = seven.GestureType || (seven.GestureType = {}));
     function stringToBool(s) {
         if (s == undefined) {
             return false;
@@ -4465,24 +3360,10 @@ var sizeXML = parser.parseFromString(sizeXMLText, "text/xml");
         return false;
     }
     seven.stringToBool = stringToBool;
+    let TextAlign;
     (function (TextAlign) {
         TextAlign[TextAlign["LEFT"] = 0] = "LEFT";
         TextAlign[TextAlign["CENTER"] = 1] = "CENTER";
         TextAlign[TextAlign["RIGHT"] = 2] = "RIGHT";
-    })(seven.TextAlign || (seven.TextAlign = {}));
-    var TextAlign = seven.TextAlign;
-    (function (UserDefaultKey) {
-        UserDefaultKey[UserDefaultKey["PVS_BLO9_ENTRIES"] = 0] = "PVS_BLO9_ENTRIES";
-        UserDefaultKey[UserDefaultKey["PVS_BLO8_ENTRIES"] = 1] = "PVS_BLO8_ENTRIES";
-        UserDefaultKey[UserDefaultKey["PVS_BLO7_ENTRIES"] = 2] = "PVS_BLO7_ENTRIES";
-        UserDefaultKey[UserDefaultKey["PVS_BLO6_ENTRIES"] = 3] = "PVS_BLO6_ENTRIES";
-        UserDefaultKey[UserDefaultKey["PVS_BLO5_ENTRIES"] = 4] = "PVS_BLO5_ENTRIES";
-        UserDefaultKey[UserDefaultKey["PVS_BLO4_ENTRIES"] = 5] = "PVS_BLO4_ENTRIES";
-        UserDefaultKey[UserDefaultKey["PVS_BLO3_ENTRIES"] = 6] = "PVS_BLO3_ENTRIES";
-        UserDefaultKey[UserDefaultKey["PVS_BLO2_ENTRIES"] = 7] = "PVS_BLO2_ENTRIES";
-        UserDefaultKey[UserDefaultKey["PVS_AF1_ENTRIES"] = 8] = "PVS_AF1_ENTRIES";
-        UserDefaultKey[UserDefaultKey["PVS_BLO13_ENTRIES"] = 9] = "PVS_BLO13_ENTRIES";
-        UserDefaultKey[UserDefaultKey["dist_history_BlockMoveHistory_entries"] = 10] = "dist_history_BlockMoveHistory_entries";
-    })(seven.UserDefaultKey || (seven.UserDefaultKey = {}));
-    var UserDefaultKey = seven.UserDefaultKey;
+    })(TextAlign = seven.TextAlign || (seven.TextAlign = {}));
 })(seven || (seven = {}));

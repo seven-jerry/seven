@@ -208,7 +208,7 @@ writeBypass()
 writeConfig()
 
 os.chdir("out_seven")
-process = subprocess.Popen("ntsc", shell=True, stdout=subprocess.PIPE)
+process = subprocess.Popen("tsc", shell=True, stdout=subprocess.PIPE)
 process.wait()
 os.chdir("..")
 
@@ -233,3 +233,6 @@ with open("out_seven/in.js",'r')as r:
 
 
 shutil.copy2("out_seven/out.js", 'seven_out.js')
+
+#if os.path.exists("out_seven"):
+ #   shutil.rmtree('out_seven')
